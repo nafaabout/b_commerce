@@ -8,4 +8,9 @@ RSpec.describe BCommerce::Base do
                                                v3: 'https://api.bigcommerce.com/stores/%{store_hash}/v3' })
   end
 
+  it 'defines HEADERS' do
+    expect(BCommerce::Base::HEADERS).to eq({ 'Accept' => 'application/json',
+                                             'Content-Type' => 'application/json' })
+  end
+
 end
