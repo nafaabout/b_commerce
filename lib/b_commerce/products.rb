@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 module BCommerce
-  class Product < Base
+  class Products < Base
     PATH = '/catalog/products'
     API_VERSION = :v3
 
