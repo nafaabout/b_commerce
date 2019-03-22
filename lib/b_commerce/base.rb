@@ -6,8 +6,8 @@ module BCommerce
     BASE_PATH = { v2: '/stores/%{store_hash}/v2',
                   v3: '/stores/%{store_hash}/v3' }.freeze
 
-    HEADERS = { 'Accept' => 'application/json',
-                'Content-Type' => 'application/json' }.freeze
+    HEADERS = { 'accept' => 'application/json',
+                'content-type' => 'application/json' }.freeze
 
     attr_reader :store_hash, :auth_token
 

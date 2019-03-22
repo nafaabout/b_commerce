@@ -14,8 +14,8 @@ module BCommerce
     end
 
     it 'defines HEADERS' do
-      expect(Base::HEADERS).to eq({ 'Accept' => 'application/json',
-                                    'Content-Type' => 'application/json' })
+      expect(Base::HEADERS).to eq({ 'accept' => 'application/json',
+                                    'content-type' => 'application/json' })
     end
 
     describe '.new(store_hash:, auth_token:)' do
