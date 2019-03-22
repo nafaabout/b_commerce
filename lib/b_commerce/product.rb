@@ -5,7 +5,11 @@ module BCommerce
 
 
     def url
-      url ||= store_url + PATH
+      @url ||= store_url + PATH
+    end
+
+    def headers
+      @headers ||= HEADERS.merge('X-Auth-Token' => auth_token)
     end
   end
 end
