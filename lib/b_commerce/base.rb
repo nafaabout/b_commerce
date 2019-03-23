@@ -3,8 +3,8 @@ module BCommerce
   class Base
     API_HOST = 'api.bigcommerce.com'
 
-    BASE_PATH = { v2: '/stores/%{store_hash}/v2',
-                  v3: '/stores/%{store_hash}/v3' }.freeze
+    STORE_PATH = { v2: '/stores/%{store_hash}/v2',
+                   v3: '/stores/%{store_hash}/v3' }.freeze
 
     HEADERS = { 'accept' => 'application/json',
                 'content-type' => 'application/json' }.freeze
@@ -18,7 +18,7 @@ module BCommerce
     end
 
     def store_url
-      @store_url ||= "https://#{API_HOST}#{BASE_PATH[self.class::API_VERSION]}" % { store_hash: store_hash }
+      @store_url ||= "https://#{API_HOST}#{STORE_PATH[self.class::API_VERSION]}" % { store_hash: store_hash }
     end
 
   end

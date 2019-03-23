@@ -8,9 +8,9 @@ module BCommerce
       expect(Base::API_HOST).to eq('api.bigcommerce.com')
     end
 
-    it 'defines BASE_PATH' do
-      expect(Base::BASE_PATH).to eq({ v2: '/stores/%{store_hash}/v2',
-                                      v3: '/stores/%{store_hash}/v3' })
+    it 'defines STORE_PATH' do
+      expect(Base::STORE_PATH).to eq({ v2: '/stores/%{store_hash}/v2',
+                                       v3: '/stores/%{store_hash}/v3' })
     end
 
     it 'defines HEADERS' do
@@ -33,10 +33,10 @@ module BCommerce
     end
 
     describe '#store_url' do
-      it 'returns "https://#{API_HOST}#{BASE_PATH[API_VERSION]}" % store_hash' do
+      it 'returns "https://#{API_HOST}#{STORE_PATH[API_VERSION]}" % store_hash' do
         Base::API_VERSION = :v3
         puts instance.store_url
-        expect(instance.store_url).to eq("https://#{Base::API_HOST}#{Base::BASE_PATH[:v3]}" % { store_hash: store_hash })
+        expect(instance.store_url).to eq("https://#{Base::API_HOST}#{Base::STORE_PATH[:v3]}" % { store_hash: store_hash })
       end
     end
   end

@@ -13,14 +13,6 @@
 # Used by dotenv library to load environment variables.
 # .env
 
-## Specific to RubyMotion:
-.dat*
-.repl_history
-build/
-*.bridgesupport
-build-iPhoneOS/
-build-iPhoneSimulator/
-
 ## Documentation cache and generated files:
 /.yardoc/
 /_yardoc/
@@ -37,3 +29,6 @@ build-iPhoneSimulator/
 
 ## Gemfile.lock because this is a gem and should work with any version
 Gemfile.lock
+
+## Byebug
+.byebug_history
