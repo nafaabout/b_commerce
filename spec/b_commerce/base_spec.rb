@@ -1,8 +1,19 @@
 module BCommerce
   RSpec.describe Base do
     let(:store_hash){ rand.to_s }
+    let(:client_id){ rand.to_s }
     let(:auth_token){ rand.to_s }
-    let(:instance){ Base.new(store_hash: store_hash, auth_token: auth_token) }
+    let(:instance){ Base.new(store_hash: store_hash,
+                             client_id: client_id,
+                             auth_token: auth_token) }
+
+    before do
+      Base::API_VERSION = %i(v2 v3).sample
+    end
+
+    after do
+      Base.send(:remove_const, :API_VERSION) if Base::API_VERSION
+    end
 
     it 'defines API_HOST' do
       expect(Base::API_HOST).to eq('api.bigcommerce.com')
@@ -27,16 +38,24 @@ module BCommerce
         expect(instance.store_hash).to be(store_hash)
       end
 
+      it 'sets #client_id' do
+        expect(instance.client_id).to be(client_id)
+      end
+
       it 'sets #auth_token' do
         expect(instance.auth_token).to be(auth_token)
       end
     end
 
-    describe '#store_url' do
+    describe '#base_url' do
       it 'returns "https://#{API_HOST}#{STORE_PATH[API_VERSION]}" % store_hash' do
-        Base::API_VERSION = :v3
-        puts instance.store_url
-        expect(instance.store_url).to eq("https://#{Base::API_HOST}#{Base::STORE_PATH[:v3]}" % { store_hash: store_hash })
+        expect(instance.base_url).to eq("https://#{Base::API_HOST}")
+      end
+    end
+
+    describe '#store_path' do
+      it 'returns the /stores/{store_hash}/{API_VERSION}' do
+        expect(instance.store_path).to eq("#{Base::STORE_PATH[Base::API_VERSION]}" % { store_hash: store_hash })
       end
     end
   end

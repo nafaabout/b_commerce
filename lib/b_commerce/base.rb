@@ -9,16 +9,21 @@ module BCommerce
     HEADERS = { 'accept' => 'application/json',
                 'content-type' => 'application/json' }.freeze
 
-    attr_reader :store_hash, :auth_token
+    attr_reader :store_hash, :client_id, :auth_token
 
 
-    def initialize(store_hash:, auth_token:)
+    def initialize(store_hash:, client_id:, auth_token:)
       @store_hash = store_hash
       @auth_token = auth_token
+      @client_id  = client_id
     end
 
-    def store_url
-      @store_url ||= "https://#{API_HOST}#{STORE_PATH[self.class::API_VERSION]}" % { store_hash: store_hash }
+    def base_url
+      @base_url ||= "https://#{API_HOST}"
+    end
+
+    def store_path
+      @store_path ||= "#{STORE_PATH[self.class::API_VERSION]}" % { store_hash: store_hash }
     end
 
   end
