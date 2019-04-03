@@ -1,12 +1,10 @@
 module BCommerce
-  RSpec.describe Products do
+ RSpec.describe Products do
     let(:id){ nil }
+    let(:store_hash) { rand.to_s }
     let(:auth_token) { rand.to_s }
-    let(:client_id){ rand.to_s }
-    let(:products) { Products.new(store_hash: 'a_hash',
-                                  client_id: client_id,
-                                  auth_token: auth_token,
-                                  id: id) }
+    let(:client_id) { rand.to_s }
+    let(:products) { Products.new(id: id) }
 
     it 'inherits from BCommerce::Base' do
       expect(Products).to be < Base
@@ -19,6 +17,12 @@ module BCommerce
     end
 
     describe '#headers' do
+      before do
+        Products.setup(client_id: client_id,
+                       store_hash: store_hash,
+                       auth_token: auth_token)
+      end
+
       it 'returns Base::HEADERS + { "x-auth-client" => client_id, "x-auth-token" => auth_token }' do
         expect(products.headers).to eq(Base::HEADERS.merge('x-auth-client' => client_id,
                                                            'x-auth-token' => auth_token))

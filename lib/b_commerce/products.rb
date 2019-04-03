@@ -6,8 +6,7 @@ module BCommerce
 
     attr_reader :id
 
-    def initialize(store_hash:, client_id:, auth_token:, id: nil)
-      super(store_hash: store_hash, client_id: client_id, auth_token: auth_token)
+    def initialize(id: nil)
       @id = id.to_s
     end
 
