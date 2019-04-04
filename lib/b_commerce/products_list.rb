@@ -10,10 +10,6 @@ module BCommerce
       @id = id.to_s
     end
 
-    def headers
-      @headers ||= HEADERS.merge('x-auth-client' => client_id, 'x-auth-token' => auth_token)
-    end
-
     def path
       @path ||= "#{store_path}#{resource_path}"
     end
@@ -30,10 +26,6 @@ module BCommerce
       resp = connection.get(path: path)
       resources = JSON(resp.body, symbolize_names: true)
       resources[:data] if resources
-    end
-
-    def connection
-      @connection ||= Excon.new(base_url, headers: headers, mock: ENV['TEST_ENV'] == 'true')
     end
   end
 end
