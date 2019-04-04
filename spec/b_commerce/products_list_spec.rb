@@ -1,24 +1,24 @@
 module BCommerce
- RSpec.describe Products do
+ RSpec.describe ProductsList do
     let(:id){ nil }
     let(:store_hash) { rand.to_s }
     let(:auth_token) { rand.to_s }
     let(:client_id) { rand.to_s }
-    let(:products) { Products.new(id: id) }
+    let(:products) { ProductsList.new(id: id) }
 
     it 'inherits from BCommerce::Base' do
-      expect(Products).to be < Base
+      expect(ProductsList).to be < Base
     end
 
     describe "PATH" do
       it "returns '/catalog/products'" do
-        expect(Products::PATH).to eq('/catalog/products')
+        expect(ProductsList::PATH).to eq('/catalog/products')
       end
     end
 
     describe '#headers' do
       before do
-        Products.setup(client_id: client_id,
+        ProductsList.setup(client_id: client_id,
                        store_hash: store_hash,
                        auth_token: auth_token)
       end
