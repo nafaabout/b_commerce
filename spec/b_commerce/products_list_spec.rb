@@ -1,10 +1,9 @@
 module BCommerce
  RSpec.describe ProductsList do
-    let(:id){ nil }
     let(:store_hash) { rand.to_s }
     let(:auth_token) { rand.to_s }
     let(:client_id) { rand.to_s }
-    let(:products) { ProductsList.new(id: id) }
+    let(:products) { ProductsList.new }
 
     it 'inherits from BCommerce::Base' do
       expect(ProductsList).to be < Base
@@ -29,6 +28,45 @@ module BCommerce
       end
     end
 
+    describe '.id(id, filters)' do
+      it 'returns the self' do
+        id = rand(1..100)
+        expect(products.id(id)).to be(products)
+      end
+
+      context 'WHEN passed an Integer' do
+        it 'sets the id filter on the query' do
+          id = rand(1..100)
+          expect{ products.id(id) }.to change{ products.query[:id] }.to(id)
+        end
+
+      end
+
+      context "WHEN passed a non Integer" do
+        it 'raises InvalidValue' do
+          value = 'd24g'
+          expect{ products.id(value) }.to raise_error(InvalidValue,
+                                                      "Invalid value #{value.inspect}, expected value of type #{Integer.inspect}.")
+        end
+      end
+
+      context 'WHEN passed a filters hash' do
+        it 'sets the id:{filter} query for all the filters' do
+          filters = { min: 23, max: 25 }
+          expect{ products.id(filters) }.to change{ products.query }
+            .to({ "id:min" => filters[:min], "id:max" => filters[:max] })
+        end
+      end
+
+      context 'WHEN a value of a filter is not convertible to Integer' do
+        it 'raises InvalidValue' do
+          value = 'd24g'
+          expect{ products.id(max: value) }.to raise_error(InvalidValue,
+                                                           "Invalid value #{value.inspect}, expected value of type #{Integer.inspect}.")
+        end
+      end
+    end
+
     describe '#all' do
       let(:page_one_products){ { id: rand(100), title: 'some product title'} }
 
@@ -37,5 +75,5 @@ module BCommerce
         expect(products.all).to eq(page_one_products)
       end
     end
-  end
+ end
 end
