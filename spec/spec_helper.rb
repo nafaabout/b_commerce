@@ -1,9 +1,12 @@
+require 'simplecov'
+SimpleCov.start
+
 ENV['TEST_ENV'] = 'true'
 
 require 'bundler/setup'
-require 'b_commerce'
 require 'byebug'
 
+require 'b_commerce'
 
 RSpec.configure do |config|
   # Enable flags like --only-failures and --next-failure
