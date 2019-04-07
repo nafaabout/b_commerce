@@ -1,8 +1,22 @@
 # frozen_string_literal: true
 module BCommerce
+  class InvalidFilters < StandardError
+    def initialize(invalid_filters, attr:, valid_filters:)
+      message = "Invalid filters #{invalid_filters.inspect} for #{attr.inspect} attribute"
+      message += ", Valid filters are #{valid_filters.inspect}" if valid_filters.size > 0
+      super(message)
+    end
+  end
+
   class InvalidValue < StandardError
-    def initialize(value, valid_types:)
-      super("Invalid value #{value.inspect}, expected value of type #{valid_types.inspect}.")
+    def initialize(value, valid_types: nil, valid_values: nil)
+      if valid_types
+        super("Invalid value #{value.inspect}, expected value of type #{valid_types.inspect}.")
+      elsif valid_values
+        super("Invalid value #{value.inspect}, expected one of #{valid_values.inspect}.")
+      else
+        super("Invalid value #{value.inspect}")
+      end
     end
   end
 
@@ -10,49 +24,121 @@ module BCommerce
     PATH = '/catalog/products'
     API_VERSION = :v3
 
-    def id(filters = {})
-      if filters.is_a?(Hash)
-        filters.each do |f, v|
-          raise InvalidValue.new(v, valid_types: Integer) unless v.integer?
-          query["id:#{f}"] = Integer(v)
-        end
-      elsif filters.integer?
-        query[:id] = Integer(filters)
-      else
-        raise InvalidValue.new(filters, valid_types: Integer)
-      end
+    ARRAY_FILTERS  = [:in, :not_in]
+    NUMBER_FILTERS = [:min, :max, :greater, :less] + ARRAY_FILTERS
+    STRING_FILTERS = [:like] + ARRAY_FILTERS
 
-      self
+    QUERY_PARAMS = {
+      id:                 Integer,
+      name:               String,
+      sku:                String,
+      upc:                String,
+      price:              Float,
+      weight:             Float,
+      condition:          ["new", "used", "refurbished"],
+      brand_id:           Integer,
+      date_modified:      String,
+      date_last_imported: String,
+      is_visible:         [true, false, 1, 0],
+      is_featured:        Integer,
+      is_free_shipping:   Integer,
+      inventory_level:    Integer,
+      inventory_low:      Integer,
+      out_of_stock:       Integer,
+      total_sold:         Integer,
+      type:               ["physical", "digital"],
+      categories:         Integer,
+      keyword:            String,
+      keyword_context:    ["shopper", "merchant"],
+      status:             Integer,
+      include:            ["variants", "images", "custom_fields", "bulk_pricing_rules", "primary_image", "modifiers", "options"],
+      include_fields:     String,
+      exclude_fields:     String,
+      availability:       ["available", "disabled", "preorder"],
+      price_list_id:      Integer,
+      page:               Integer,
+      limit:              Integer,
+      direction:          ["asc", "desc"],
+      sort:               ["id", "name", "sku", "price", "date_modified", "date_last_imported", "inventory_level", "is_visible", "total_sold"]
+    }
+
+    QUERY_PARAMS.each do |param, type_or_values|
+      if type_or_values.is_a?(Array)
+        valid_values = type_or_values
+        define_method param do |filters = {}|
+          if valid_values.include?(filters)
+            query[param] = filters
+          elsif filters.is_a?(Hash)
+            check_filters_validity(param, filters: filters)
+            filters.each do |f, v|
+              unless valid_value_for?(param, value: v)
+                raise InvalidValue.new(v, valid_values: valid_values)
+              end
+              query["#{param}:#{f}"] = v
+            end
+          else
+            raise InvalidValue.new(filters, valid_values: valid_values)
+          end
+
+          self
+        end
+
+      else
+        type = type_or_values
+        define_method param do |filters = {}|
+          type_check_method = type.to_s.downcase + '?'
+          if filters.is_a?(Hash)
+            filters.each do |f, v|
+              if !v.public_send(type_check_method)
+                raise InvalidValue.new(v, valid_types: type)
+              end
+              query["#{param}:#{f}"] = send(type.to_s, v)
+            end
+          elsif filters.public_send(type_check_method)
+            query[param] = send(type.to_s, filters)
+          else
+            raise InvalidValue.new(filters, valid_types: type)
+          end
+
+          self
+        end
+
+      end
     end
 
-    def name(filters = {})
-      if filters.string?
-        query[:name] = filters
-      elsif filters.is_a?(Hash)
-        filters.each do |f, v|
-          raise InvalidValue.new(v, valid_types: String) unless v.string?
-          query["name:#{f}"] = v
-        end
-      else
-        raise InvalidValue.new(filters, valid_types: String)
+    def check_filters_validity(param, filters:)
+      type = QUERY_PARAMS[param]
+      invalid_f = invalid_filters(param, filters.keys)
+      if !invalid_f.empty?
+      raise InvalidFilters.new(invalid_f, attr: :type,
+                               valid_filters: valid_filters_for(type))
       end
-
-      self
+      true
     end
 
-    def type(filters = {})
-      if filters.string?
-        query[:type] = filters
-      elsif filters.is_a?(Hash)
-        filters.each do |f, v|
-          raise InvalidValue.new(v, valid_types: String) unless v.string?
-          query["type:#{f}"] = v
-        end
-      else
-        raise InvalidValue.new(filters, valid_types: String)
-      end
+    def invalid_filters(type, filters)
+      filters - valid_filters_for(type)
+    end
 
-      self
+    def valid_filters_for(type)
+      if [Integer, Numeric].include?(type)
+        NUMBER_FILTERS
+      elsif type == String
+        STRING_FILTERS
+      elsif type.is_a?(Array)
+        ARRAY_FILTERS
+      else
+        []
+      end
+    end
+
+    def valid_value_for?(param, value:)
+      type_or_values = QUERY_PARAMS[param]
+      if type_or_values.is_a?(Array)
+        type_or_values.include?(value)
+      else
+        value.is_a?(type_or_values)
+      end
     end
 
 

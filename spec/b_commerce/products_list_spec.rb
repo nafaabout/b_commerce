@@ -105,6 +105,36 @@ module BCommerce
       end
     end
 
+    describe '#type' do
+      it 'returns self' do
+        type = 'physical'
+        expect(products.type(type)).to be(products)
+      end
+
+      context 'WHEN passed one of ["physical", "digital"]' do
+        it 'sets type filter on the query' do
+          type = %w(physical digital).sample
+          expect{ products.type(type) }.to change{ products.query[:type] }.to(type)
+        end
+      end
+
+      context 'WHEN passed value other than ["physical", "digital"]' do
+        it 'raises InvalidValue' do
+          value = 'not physical or digital'
+          expect{ products.type(value) }.to raise_error(InvalidValue,
+                                                        "Invalid value #{value.inspect}, expected one of #{['physical', 'digital'].inspect}.")
+        end
+      end
+
+      context 'WHEN passed a filters hash' do
+        it 'raises InvalidFilters error' do
+          filters = { like: 'physical' }
+          expect{ products.type(filters) }.to raise_error(InvalidFilters,
+                                                          'Invalid filters [:like] for :type attribute, Valid filters are [:in, :not_in]')
+        end
+      end
+    end
+
     describe '#all' do
       let(:page_one_products){ { id: rand(100), title: 'some product title'} }
 
