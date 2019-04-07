@@ -28,7 +28,7 @@ module BCommerce
       end
     end
 
-    describe '.id(id, filters)' do
+    describe '#id' do
       it 'returns the self' do
         id = rand(1..100)
         expect(products.id(id)).to be(products)
@@ -63,6 +63,44 @@ module BCommerce
           value = 'd24g'
           expect{ products.id(max: value) }.to raise_error(InvalidValue,
                                                            "Invalid value #{value.inspect}, expected value of type #{Integer.inspect}.")
+        end
+      end
+    end
+
+    describe '#name' do
+      it 'returns self' do
+        name = "some_name"
+        expect(products.name(name)).to be(products)
+      end
+
+      context 'WHEN passed a String' do
+        it 'sets name filter on the query' do
+          name = 'some name'
+          expect{ products.name(name) }.to change{ products.query[:name] }.to(name)
+        end
+      end
+
+      context 'WhEN passed a non String' do
+        it 'raises InvalidValue' do
+          value = 123
+          expect{ products.name(value) }.to raise_error(InvalidValue,
+                                                        "Invalid value #{value.inspect}, expected value of type #{String.inspect}.")
+        end
+      end
+
+      context 'WHEN passed a filters hash' do
+        it 'sets the name:{filter} query for all the filters' do
+          filters = { like: 'Hora' }
+          expect{ products.name(filters) }.to change{ products.query }
+            .to({ "name:like" => filters[:like] })
+        end
+      end
+
+      context 'WHEN a value of a filter is not a String' do
+        it 'raises InvalidValue' do
+          value = 234
+          expect{ products.name(like: value) }.to raise_error(InvalidValue,
+                                                              "Invalid value #{value.inspect}, expected value of type #{String.inspect}.")
         end
       end
     end

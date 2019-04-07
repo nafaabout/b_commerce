@@ -25,6 +25,37 @@ module BCommerce
       self
     end
 
+    def name(filters = {})
+      if filters.string?
+        query[:name] = filters
+      elsif filters.is_a?(Hash)
+        filters.each do |f, v|
+          raise InvalidValue.new(v, valid_types: String) unless v.string?
+          query["name:#{f}"] = v
+        end
+      else
+        raise InvalidValue.new(filters, valid_types: String)
+      end
+
+      self
+    end
+
+    def type(filters = {})
+      if filters.string?
+        query[:type] = filters
+      elsif filters.is_a?(Hash)
+        filters.each do |f, v|
+          raise InvalidValue.new(v, valid_types: String) unless v.string?
+          query["type:#{f}"] = v
+        end
+      else
+        raise InvalidValue.new(filters, valid_types: String)
+      end
+
+      self
+    end
+
+
     def path
       @path ||= "#{store_path}#{PATH}"
     end
