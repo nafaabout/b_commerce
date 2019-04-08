@@ -2,7 +2,6 @@ require 'byebug'
 module QueryMethods
 
   def self.extended(base)
-    puts "Extending #{base.to_s}"
     base.include InstanceMethods
   end
 
@@ -22,13 +21,7 @@ module QueryMethods
 
         check_values(param, values: values, valid_values: valid_values)
 
-        if filters.is_a?(Hash)
-          filters.each do |f, v|
-            query["#{param}:#{f}"] = v
-          end
-        else
-          query[param] = filters
-        end
+        set_query(param, filters)
 
         self
       end
@@ -51,13 +44,7 @@ module QueryMethods
 
         check_values_type(param, values: values, valid_type: type)
 
-        if filters.is_a?(Hash)
-          filters.each do |f, v|
-            query["#{param}:#{f}"] = v
-          end
-        else
-          query[param] = filters
-        end
+        set_query(param, filters)
 
         self
       end
@@ -68,6 +55,20 @@ module QueryMethods
   module InstanceMethods
 
     protected
+
+    def query
+      @query ||= {}
+    end
+
+    def set_query(param, filters)
+      if filters.is_a?(Hash)
+        filters.each do |f, v|
+          query["#{param}:#{f}"] = v.is_a?(Array) ? v.join(',') : v
+        end
+      else
+        query[param] = filters.is_a?(Array) ? filters.join(',') : filters
+      end
+    end
 
     def check_filters(param, filters:, valid_filters:)
       invalid_filters = filters - valid_filters
