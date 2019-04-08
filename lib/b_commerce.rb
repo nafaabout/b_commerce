@@ -5,6 +5,7 @@ require 'json' unless self.class.const_defined?('JSON')
 
 require 'b_commerce/version'
 require 'b_commerce/utils/object'
+require 'b_commerce/errors'
 require 'b_commerce/base'
 require 'b_commerce/products_list'
 
