@@ -1,14 +1,9 @@
 # frozen_string_literal: true
 module BCommerce
 
-  class ProductsList < Base
+  class ProductsList < ResourceList
     PATH = '/catalog/products'
     API_VERSION = :v3
-
-    ARRAY_FILTERS  = [:in, :not_in]
-    NUMBER_FILTERS = [:min, :max, :greater, :less] + ARRAY_FILTERS
-    STRING_FILTERS = [:like] + ARRAY_FILTERS
-
 
     QUERY_PARAMS = {
       enum: {
@@ -48,8 +43,6 @@ module BCommerce
         limit:              Integer,
       }
     }
-
-    extend QueryMethods
 
     generate_enum_params_query_methods(params: QUERY_PARAMS[:enum])
     generate_non_enum_params_query_methods(params: QUERY_PARAMS[:non_enum])
