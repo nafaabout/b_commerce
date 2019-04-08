@@ -1,3 +1,4 @@
+require 'byebug'
 module QueryMethods
 
   def self.extended(base)
@@ -8,20 +9,25 @@ module QueryMethods
   protected
 
   def generate_enum_params_query_methods(params:)
-    params.each do |param, values|
+    params.each do |param, valid_values|
       define_method param do |filters = {}|
-        if values.include?(filters)
-          query[param] = filters
+        if filters.is_a?(Array)
+          filters = { in: filters }
         elsif filters.is_a?(Hash)
-          check_filters_validity(param, filters: filters)
+          check_filters(param, filters: filters.keys, valid_filters: self.class::ARRAY_FILTERS)
+          values = filters.values.flatten
+        else
+          values = [filters].flatten
+        end
+
+        check_values(param, values: values, valid_values: valid_values)
+
+        if filters.is_a?(Hash)
           filters.each do |f, v|
-            unless valid_value_for?(param, value: v)
-              raise BCommerce::InvalidValue.new(v, valid_values: values)
-            end
             query["#{param}:#{f}"] = v
           end
         else
-          raise BCommerce::InvalidValue.new(filters, valid_values: values)
+          query[param] = filters
         end
 
         self
@@ -33,18 +39,24 @@ module QueryMethods
   def generate_non_enum_params_query_methods(params:)
     params.each do |param, type|
       define_method param do |filters = {}|
-        type_check_method = type.to_s.downcase + '?'
+        if filters.is_a?(Array)
+          values = filters
+          filters = { in: filters }
+        elsif filters.is_a?(Hash)
+          check_filters(param, filters: filters.keys, valid_filters: valid_filters_for(type))
+          values = filters.values.flatten
+        else
+          values = [filters].flatten
+        end
+
+        check_values_type(param, values: values, valid_type: type)
+
         if filters.is_a?(Hash)
           filters.each do |f, v|
-            if !v.public_send(type_check_method)
-              raise BCommerce::InvalidValue.new(v, valid_types: type)
-            end
-            query["#{param}:#{f}"] = send(type.to_s, v)
+            query["#{param}:#{f}"] = v
           end
-        elsif filters.public_send(type_check_method)
-          query[param] = send(type.to_s, filters)
         else
-          raise BCommerce::InvalidValue.new(filters, valid_types: type)
+          query[param] = filters
         end
 
         self
@@ -57,19 +69,27 @@ module QueryMethods
 
     protected
 
-    def check_filters_validity(param, filters:)
-      type = self.class::QUERY_PARAMS.dig(:enum, param)
-      type ||= self.class::QUERY_PARAMS.dig(:not_enum, param)
-      invalid_f = invalid_filters(param, filters.keys)
-      if !invalid_f.empty?
-        raise BCommerce::InvalidFilters.new(invalid_f, attr: :type,
-                                            valid_filters: valid_filters_for(type))
+    def check_filters(param, filters:, valid_filters:)
+      invalid_filters = filters - valid_filters
+      if !invalid_filters.empty?
+        raise BCommerce::InvalidFilters.new(invalid_filters, attr: param,
+                                            valid_filters: valid_filters)
       end
-      true
     end
 
-    def invalid_filters(type, filters)
-      filters - valid_filters_for(type)
+    def check_values_type(param, values:, valid_type:)
+      meth = valid_type.to_s.downcase + '?'
+      invalid_values = values.select{ |v| !v.public_send(meth) }
+      if !invalid_values.empty?
+        raise BCommerce::InvalidValue.new(invalid_values, attr: param, valid_types: valid_type)
+      end
+    end
+
+    def check_values(param, values:, valid_values:)
+      invalid_values = values - valid_values
+      if !invalid_values.empty?
+        raise BCommerce::InvalidValue.new(invalid_values, attr: param, valid_values: valid_values)
+      end
     end
 
     def valid_filters_for(type)
@@ -77,21 +97,9 @@ module QueryMethods
         self.class::NUMBER_FILTERS
       elsif type == String
         self.class::STRING_FILTERS
-      elsif type.is_a?(Array)
-        self.class::ARRAY_FILTERS
       else
         []
       end
     end
-
-    def valid_value_for?(param, value:)
-      type_or_values = self.class::QUERY_PARAMS[param]
-      if type_or_values.is_a?(Array)
-        type_or_values.include?(value)
-      else
-        value.is_a?(type_or_values)
-      end
-    end
-
   end
 end
