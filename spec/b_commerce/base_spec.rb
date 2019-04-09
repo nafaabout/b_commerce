@@ -22,30 +22,35 @@ module BCommerce
                                     'content-type' => 'application/json' })
     end
 
-    # describe '.stores_auth_tokens' do
-    #   it 'returns a Hash of auth_tokens previously cached by Base.setup' do
-    #     tokens = { 'store_hash_1' => 'token_1', 'store_hash_2' => 'token_2' }
-    #     tokens.each do |store_hash, auth_token|
-    #       Base.setup(client_id: 'id', store_hash: store_hash, auth_token: auth_token)
-    #     end
-    #     expect(Base.stores_auth_tokens).to eq(tokens)
-    #   end
-    # end
-    #
-    # describe '.auth_token_for(store_hash:)' do
-    #   it 'returns Base.stores_auth_tokens[store_hash]' do
-    #     Base.setup(client_id: client_id, store_hash: store_hash, auth_token: auth_token)
-    #     expect(Base.auth_token_for(store_hash: store_hash)).to be(auth_token)
-    #   end
-    # end
-
     describe '.client_id' do
-      it 'returns client_id set with Base.setup' do
-        Base.setup(client_id: client_id, store_hash: store_hash, auth_token: auth_token)
-        expect(Base.client_id).to be(client_id)
+      context 'WHEN client_is is set' do
+        it 'returns client_id set with Base.setup' do
+          Base.setup(client_id: client_id, store_hash: store_hash, auth_token: auth_token)
+          expect(Base.client_id).to be(client_id)
+        end
+      end
+
+      context 'WHEN client_id not set' do
+        it 'raises and error' do
+          expect{ instance.client_id }.to raise_error(MissingCredentials)
+        end
       end
     end
 
+    describe '.auth_token' do
+      context 'WHEN client_is is set' do
+        it 'returns auth_token set with Base.setup' do
+          Base.setup(client_id: client_id, store_hash: store_hash, auth_token: auth_token)
+          expect(Base.auth_token).to be(auth_token)
+        end
+      end
+
+      context 'WHEN auth_token not set' do
+        it 'raises and error' do
+          expect{ instance.auth_token }.to raise_error(MissingCredentials)
+        end
+      end
+    end
     describe '.setup(client_id:, store_hash:, auth_token:)' do
       it 'sets store_hash' do
         expect{ Base.setup(client_id: client_id, store_hash: store_hash, auth_token: auth_token) }.to\
@@ -66,6 +71,21 @@ module BCommerce
     describe '#base_url' do
       it 'returns API_HOST' do
         expect(instance.base_url).to eq(Base::API_HOST)
+      end
+    end
+
+    describe '#store_hash' do
+      context 'WHEN store_hash is set' do
+        it 'returns store_hash set with .setup method' do
+          Base.setup(client_id: client_id, store_hash: store_hash, auth_token: auth_token)
+          expect(instance.store_hash).to be store_hash
+        end
+      end
+
+      context 'WHEN store_hash is not set' do
+        it 'raises an error' do
+          expect{ instance.store_hash }.to raise_error(MissingCredentials)
+        end
       end
     end
 

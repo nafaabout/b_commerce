@@ -53,15 +53,27 @@ module BCommerce
       end
 
       def client_id
-        Thread.current[:client_id]
+        client_id = Thread.current[:client_id]
+        if !client_id
+          raise MissingCredentials.new('client_id')
+        end
+        client_id
       end
 
       def store_hash
-        Thread.current[:store_hash]
+        hash = Thread.current[:store_hash]
+        if !hash
+          raise MissingCredentials.new('store_hash')
+        end
+        hash
       end
 
       def auth_token
-        Thread.current[:auth_token]
+        token = Thread.current[:auth_token]
+        if !token
+          raise MissingCredentials.new('auth_token')
+        end
+        token
       end
 
       def headers
