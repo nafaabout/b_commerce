@@ -11,12 +11,17 @@ require 'b_commerce/base'
 require 'b_commerce/errors'
 
 require 'b_commerce/catalog/resource_list'
-require 'b_commerce/catalog/products_list'
+
+Dir[File.join(__dir__, 'b_commerce/catalog/*.rb')].each{ |f| require f }
 
 module BCommerce
 
   def self.[](resource_type)
     class_name = resource_type.to_s.split('_').map(&:capitalize).join + 'List'
-    const_get(class_name)
+    if Catalog.const_defined?(class_name)
+      Catalog.const_get(class_name)
+    else
+      const_get(class_name)
+    end
   end
 end

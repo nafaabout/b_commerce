@@ -1,2 +1,6 @@
-class ProductVariantOptionsValuesList < ResourceList
+module BCommerce
+  module Catalog
+    class ProductVariantOptionsValuesList < ResourceList
+    end
+  end
 end

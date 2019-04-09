@@ -4,11 +4,11 @@ RSpec.describe BCommerce do
   end
 
   describe '.[]' do
-    it 'returns the #{Resource}List class' do
-      expect(BCommerce[:products]).to be(BCommerce::ProductsList)
+    it 'returns the BCommerce::Catalog::#{Resource}List class' do
+      expect(BCommerce[:products]).to be(BCommerce::Catalog::ProductsList)
     end
 
-    it 'raise an error NameError: uninitialized constant BCommerce::#{Resource}List' do
+    it 'raises an error NameError: uninitialized constant BCommerce::#{Resource}List' do
       expect{ BCommerce[:strange_resource] }.to raise_error(NameError)
     end
   end

@@ -1,2 +1,6 @@
-class ProductComplexRulesList < ResourceList
+module BCommerce
+  module Catalog
+    class ProductComplexRulesList < ResourceList
+    end
+  end
 end
