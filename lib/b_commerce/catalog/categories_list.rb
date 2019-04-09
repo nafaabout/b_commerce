@@ -1,0 +1,2 @@
+class CategoriesList < ResourceList
+end

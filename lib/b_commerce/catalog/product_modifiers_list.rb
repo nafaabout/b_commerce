@@ -1,0 +1,2 @@
+class ProductModifiersList < ResourceList
+end

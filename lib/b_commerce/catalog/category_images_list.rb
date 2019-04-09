@@ -1,0 +1,2 @@
+class CategoryImagesList < ResourceList
+end

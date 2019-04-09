@@ -1,0 +1,2 @@
+class ProductVideosList < ResourceList
+end

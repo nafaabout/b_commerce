@@ -15,7 +15,7 @@ module BCommerce
     end
 
     def path
-      @path ||= "#{store_path}#{PATH}"
+      @path ||= "#{store_path}#{self.class::PATH}"
     end
 
     def query

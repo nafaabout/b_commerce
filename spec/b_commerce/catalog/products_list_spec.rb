@@ -18,8 +18,8 @@ module BCommerce
     describe '#headers' do
       before do
         ProductsList.setup(client_id: client_id,
-                       store_hash: store_hash,
-                       auth_token: auth_token)
+                           store_hash: store_hash,
+                           auth_token: auth_token)
       end
 
       it 'returns Base::HEADERS + { "x-auth-client" => client_id, "x-auth-token" => auth_token }' do
@@ -46,7 +46,7 @@ module BCommerce
         it 'raises InvalidValue' do
           value = 'd24g'
           expect{ products.id(value) }.to raise_error(InvalidValue,
-                                                      "Invalid value #{value.inspect}, expected value of type #{Integer.inspect}.")
+                                                      "Invalid value #{[value].inspect} for :id, expected value of type #{Integer.inspect}.")
         end
       end
 
@@ -62,45 +62,7 @@ module BCommerce
         it 'raises InvalidValue' do
           value = 'd24g'
           expect{ products.id(max: value) }.to raise_error(InvalidValue,
-                                                           "Invalid value #{value.inspect}, expected value of type #{Integer.inspect}.")
-        end
-      end
-    end
-
-    describe '#name' do
-      it 'returns self' do
-        name = "some_name"
-        expect(products.name(name)).to be(products)
-      end
-
-      context 'WHEN passed a String' do
-        it 'sets name filter on the query' do
-          name = 'some name'
-          expect{ products.name(name) }.to change{ products.query[:name] }.to(name)
-        end
-      end
-
-      context 'WhEN passed a non String' do
-        it 'raises InvalidValue' do
-          value = 123
-          expect{ products.name(value) }.to raise_error(InvalidValue,
-                                                        "Invalid value #{value.inspect}, expected value of type #{String.inspect}.")
-        end
-      end
-
-      context 'WHEN passed a filters hash' do
-        it 'sets the name:{filter} query for all the filters' do
-          filters = { like: 'Hora' }
-          expect{ products.name(filters) }.to change{ products.query }
-            .to({ "name:like" => filters[:like] })
-        end
-      end
-
-      context 'WHEN a value of a filter is not a String' do
-        it 'raises InvalidValue' do
-          value = 234
-          expect{ products.name(like: value) }.to raise_error(InvalidValue,
-                                                              "Invalid value #{value.inspect}, expected value of type #{String.inspect}.")
+                                                           "Invalid value #{[value].inspect} for :id, expected value of type #{Integer.inspect}.")
         end
       end
     end
@@ -122,7 +84,7 @@ module BCommerce
         it 'raises InvalidValue' do
           value = 'not physical or digital'
           expect{ products.type(value) }.to raise_error(InvalidValue,
-                                                        "Invalid value #{value.inspect}, expected one of #{['physical', 'digital'].inspect}.")
+                                                        "Invalid value #{[value].inspect} for :type, expected one of #{['physical', 'digital'].inspect}.")
         end
       end
 
@@ -138,7 +100,14 @@ module BCommerce
     describe '#all' do
       let(:page_one_products){ { id: rand(100), title: 'some product title'} }
 
+      before do
+        ProductsList.setup(client_id: client_id,
+                           store_hash: store_hash,
+                           auth_token: auth_token)
+      end
+
       it 'returns page 1 of products of the store from Bigcommerce' do
+
         Excon.stub({ method: :get, path: products.path }, { body: { data: page_one_products }.to_json })
         expect(products.all).to eq(page_one_products)
       end

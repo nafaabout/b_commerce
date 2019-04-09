@@ -1,0 +1,2 @@
+class VariantsList < ResourceList
+end

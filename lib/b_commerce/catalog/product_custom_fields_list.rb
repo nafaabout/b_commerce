@@ -1,0 +1,2 @@
+class ProductCustomFieldsList < ResourceList
+end

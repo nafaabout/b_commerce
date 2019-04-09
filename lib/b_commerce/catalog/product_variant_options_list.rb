@@ -1,0 +1,2 @@
+class ProductVariantOptionsList < ResourceList
+end

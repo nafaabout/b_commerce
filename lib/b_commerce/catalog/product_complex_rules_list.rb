@@ -1,0 +1,2 @@
+class ProductComplexRulesList < ResourceList
+end

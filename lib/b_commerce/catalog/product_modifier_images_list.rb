@@ -1,0 +1,2 @@
+class ProductModifierImagesList < ResourceList
+end

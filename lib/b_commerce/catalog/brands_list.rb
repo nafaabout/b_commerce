@@ -1,0 +1,2 @@
+class BrandsList < ResourceList
+end

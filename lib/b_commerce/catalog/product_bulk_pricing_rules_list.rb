@@ -1,0 +1,2 @@
+class ProductBulkPricingRulesList < ResourceList
+end

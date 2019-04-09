@@ -1,0 +1,2 @@
+class ProductMetafieldsList < ResourceList
+end

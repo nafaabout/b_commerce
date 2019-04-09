@@ -11,6 +11,7 @@ module BCommerce
 
     after do
       Base.send(:remove_const, :API_VERSION) if Base::API_VERSION
+      Base.setup(client_id: nil, store_hash: nil, auth_token: nil)
     end
 
     it 'defines API_HOST' do
@@ -20,6 +21,21 @@ module BCommerce
     it 'defines HEADERS' do
       expect(Base::HEADERS).to eq({ 'accept' => 'application/json',
                                     'content-type' => 'application/json' })
+    end
+
+    describe '#store_hash' do
+      context 'WHEN store_hash is set' do
+        it 'returns store_hash set with .setup method' do
+          Base.setup(client_id: client_id, store_hash: store_hash, auth_token: auth_token)
+          expect(instance.store_hash).to be store_hash
+        end
+      end
+
+      context 'WHEN store_hash is not set' do
+        it 'raises an error' do
+          expect{ instance.store_hash }.to raise_error(MissingCredentials)
+        end
+      end
     end
 
     describe '.client_id' do
@@ -51,41 +67,27 @@ module BCommerce
         end
       end
     end
+
     describe '.setup(client_id:, store_hash:, auth_token:)' do
       it 'sets store_hash' do
-        expect{ Base.setup(client_id: client_id, store_hash: store_hash, auth_token: auth_token) }.to\
-          change{ Base.store_hash }.to(store_hash)
+        Base.setup(client_id: client_id, store_hash: store_hash, auth_token: auth_token)
+        expect(Base.store_hash).to be store_hash
       end
 
       it "sets stores's auth_token" do
-        expect{ Base.setup(client_id: client_id, store_hash: store_hash, auth_token: auth_token) }.to\
-          change{ Base.auth_token }.to(auth_token)
+        Base.setup(client_id: client_id, store_hash: store_hash, auth_token: auth_token)
+        expect(Base.auth_token).to be auth_token
       end
 
       it "sets application's client_id" do
-        expect{ Base.setup(client_id: client_id, store_hash: store_hash, auth_token: auth_token) }.to\
-          change{ Base.client_id }.to(client_id)
+        Base.setup(client_id: client_id, store_hash: store_hash, auth_token: auth_token)
+        expect(Base.client_id).to be client_id
       end
     end
 
     describe '#base_url' do
       it 'returns API_HOST' do
         expect(instance.base_url).to eq(Base::API_HOST)
-      end
-    end
-
-    describe '#store_hash' do
-      context 'WHEN store_hash is set' do
-        it 'returns store_hash set with .setup method' do
-          Base.setup(client_id: client_id, store_hash: store_hash, auth_token: auth_token)
-          expect(instance.store_hash).to be store_hash
-        end
-      end
-
-      context 'WHEN store_hash is not set' do
-        it 'raises an error' do
-          expect{ instance.store_hash }.to raise_error(MissingCredentials)
-        end
       end
     end
 

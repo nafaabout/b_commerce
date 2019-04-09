@@ -1,4 +1,3 @@
-require 'byebug'
 module QueryMethods
 
   def self.extended(base)
@@ -54,11 +53,11 @@ module QueryMethods
 
   module InstanceMethods
 
-    protected
-
     def query
       @query ||= {}
     end
+
+    protected
 
     def set_query(param, filters)
       if filters.is_a?(Hash)
@@ -71,7 +70,7 @@ module QueryMethods
     end
 
     def check_filters(param, filters:, valid_filters:)
-      invalid_filters = filters - valid_filters
+      invalid_filters = Array(filters) - valid_filters
       if !invalid_filters.empty?
         raise BCommerce::InvalidFilters.new(invalid_filters, attr: param,
                                             valid_filters: valid_filters)
@@ -80,7 +79,7 @@ module QueryMethods
 
     def check_values_type(param, values:, valid_type:)
       meth = valid_type.to_s.downcase + '?'
-      invalid_values = values.select{ |v| !v.public_send(meth) }
+      invalid_values = Array(values).select{ |v| !v.public_send(meth) }
       if !invalid_values.empty?
         raise BCommerce::InvalidValue.new(invalid_values, attr: param, valid_types: valid_type)
       end
