@@ -14,6 +14,14 @@ module BCommerce
       @store_path ||= "/stores/#{store_hash}/#{api_version}"
     end
 
+    def path
+      @path ||= "#{store_path}#{PATH}"
+    end
+
+    def query
+      @query ||= {}
+    end
+
     def api_version
       self.class::API_VERSION
     end

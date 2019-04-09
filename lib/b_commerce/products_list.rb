@@ -47,18 +47,5 @@ module BCommerce
     generate_enum_params_query_methods(params: QUERY_PARAMS[:enum])
     generate_non_enum_params_query_methods(params: QUERY_PARAMS[:non_enum])
 
-    def path
-      @path ||= "#{store_path}#{PATH}"
-    end
-
-    def query
-      @query ||= {}
-    end
-
-    def all
-      resp = connection.get(path: path, query: query)
-      resources = JSON(resp.body, symbolize_names: true)
-      resources[:data] if resources
-    end
   end
 end
