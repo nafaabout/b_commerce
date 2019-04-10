@@ -21,5 +21,6 @@ RSpec.configure do |config|
 
   config.after(:each) do
     Excon.stubs.clear
+    BCommerce::Base.setup(client_id: nil, store_hash: nil, auth_token: nil)
   end
 end

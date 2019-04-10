@@ -3,7 +3,7 @@ module BCommerce
     let(:store_hash){ rand.to_s }
     let(:client_id){ rand.to_s }
     let(:auth_token){ rand.to_s }
-    let(:instance){ Base.new }
+    let(:base){ Base.new }
 
     before do
       Base::API_VERSION = %i(v2 v3).sample
@@ -11,7 +11,6 @@ module BCommerce
 
     after do
       Base.send(:remove_const, :API_VERSION) if Base::API_VERSION
-      Base.setup(client_id: nil, store_hash: nil, auth_token: nil)
     end
 
     it 'defines API_HOST' do
@@ -27,13 +26,13 @@ module BCommerce
       context 'WHEN store_hash is set' do
         it 'returns store_hash set with .setup method' do
           Base.setup(client_id: client_id, store_hash: store_hash, auth_token: auth_token)
-          expect(instance.store_hash).to be store_hash
+          expect(base.store_hash).to be store_hash
         end
       end
 
       context 'WHEN store_hash is not set' do
         it 'raises an error' do
-          expect{ instance.store_hash }.to raise_error(MissingCredentials)
+          expect{ base.store_hash }.to raise_error(MissingCredentials)
         end
       end
     end
@@ -48,7 +47,7 @@ module BCommerce
 
       context 'WHEN client_id not set' do
         it 'raises and error' do
-          expect{ instance.client_id }.to raise_error(MissingCredentials)
+          expect{ base.client_id }.to raise_error(MissingCredentials)
         end
       end
     end
@@ -63,7 +62,7 @@ module BCommerce
 
       context 'WHEN auth_token not set' do
         it 'raises and error' do
-          expect{ instance.auth_token }.to raise_error(MissingCredentials)
+          expect{ base.auth_token }.to raise_error(MissingCredentials)
         end
       end
     end
@@ -87,14 +86,14 @@ module BCommerce
 
     describe '#base_url' do
       it 'returns API_HOST' do
-        expect(instance.base_url).to eq(Base::API_HOST)
+        expect(base.base_url).to eq(Base::API_HOST)
       end
     end
 
     describe '#store_path' do
       it 'returns the /stores/{store_hash}/{API_VERSION}' do
 				Base.setup(client_id: client_id, store_hash: store_hash, auth_token: auth_token)
-        expect(instance.store_path).to eq("/stores/#{store_hash}/#{Base::API_VERSION}")
+        expect(base.store_path).to eq("/stores/#{store_hash}/#{Base::API_VERSION}")
       end
     end
   end

@@ -9,7 +9,13 @@ module BCommerce
 
       def all
         resp = connection.get(path: path, query: query)
-        resources = JSON(resp.body, symbolize_names: true)
+        response_data(response: resp)
+      end
+
+      protected
+
+      def response_data(response:)
+        resources = JSON(response.body, symbolize_names: true)
         resources[:data] if resources
       end
     end
