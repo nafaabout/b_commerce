@@ -10,6 +10,7 @@ module QueryMethods
     params.each do |param, valid_values|
       define_method param do |filters = {}|
         if filters.is_a?(Array)
+          values = filters.flatten
           filters = { in: filters }
         elsif filters.is_a?(Hash)
           check_filters(param, filters: filters.keys, valid_filters: self.class::ARRAY_FILTERS)
@@ -86,7 +87,7 @@ module QueryMethods
     end
 
     def check_values(param, values:, valid_values:)
-      invalid_values = values - valid_values
+      invalid_values = Array(values) - valid_values
       if !invalid_values.empty?
         raise BCommerce::InvalidValue.new(invalid_values, attr: param, valid_values: valid_values)
       end
@@ -97,8 +98,6 @@ module QueryMethods
         self.class::NUMBER_FILTERS
       elsif type == String
         self.class::STRING_FILTERS
-      else
-        []
       end
     end
   end
