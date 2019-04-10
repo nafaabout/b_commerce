@@ -102,21 +102,6 @@ module BCommerce
         end
       end
 
-      describe '#all' do
-        let(:page_one_products){ { id: rand(100), title: 'some product title'} }
-
-        before do
-          Base.setup(client_id: client_id,
-                     store_hash: store_hash,
-                     auth_token: auth_token)
-        end
-
-        it 'returns page 1 of products_list of the store from Bigcommerce' do
-
-          Excon.stub({ method: :get, path: products_list.path }, { body: { data: page_one_products }.to_json })
-          expect(products_list.all).to eq(page_one_products)
-        end
-      end
     end
   end
 end

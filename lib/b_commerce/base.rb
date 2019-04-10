@@ -18,10 +18,6 @@ module BCommerce
       @path ||= "#{store_path}#{self.class::PATH}"
     end
 
-    def query
-      @query ||= {}
-    end
-
     def api_version
       self.class::API_VERSION
     end
