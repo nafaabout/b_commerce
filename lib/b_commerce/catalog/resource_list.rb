@@ -26,7 +26,7 @@ module BCommerce
       end
 
       def delete
-
+        connection.delete(path: path, query: query)
       end
 
       protected

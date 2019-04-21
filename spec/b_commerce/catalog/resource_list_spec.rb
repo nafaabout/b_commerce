@@ -14,6 +14,16 @@ module BCommerce
 
     RSpec.describe ResourceList do
       let(:tests_list){ TestResourceList.new }
+      let(:store_hash) { rand.to_s }
+      let(:auth_token) { rand.to_s }
+      let(:client_id) { rand.to_s }
+
+      before do
+        Base.setup(client_id: client_id,
+                   store_hash: store_hash,
+                   auth_token: auth_token)
+      end
+
 
       specify 'NUMBER_FILTERS is [:min, :max, :greater, :less, :in, :not_in]' do
         expect(ResourceList::NUMBER_FILTERS).to eq([:min, :max, :greater, :less, :in, :not_in])
@@ -29,15 +39,6 @@ module BCommerce
 
       describe '#all' do
         let(:page_one_tests){ { id: rand(100), title: 'some product title'} }
-        let(:store_hash) { rand.to_s }
-        let(:auth_token) { rand.to_s }
-        let(:client_id) { rand.to_s }
-
-        before do
-          Base.setup(client_id: client_id,
-                     store_hash: store_hash,
-                     auth_token: auth_token)
-        end
 
         it 'calls the api with the resource_list#path and #query' do
           page_one_tests = [{ name: 'Some Resource', price: rand }]
@@ -77,6 +78,14 @@ module BCommerce
         it 'returns the created resource' do
           allow(TestResource).to receive(:new).and_return(test_resource)
           expect(tests_list.create).to be(test_resource)
+        end
+      end
+
+      describe '#delete' do
+        it 'calls the api DELETE /catalog/resources' do
+          expect(tests_list.connection).to receive(:delete)
+            .with(path: tests_list.path, query: tests_list.query)
+          tests_list.delete
         end
       end
     end
