@@ -3,6 +3,9 @@ module BCommerce
     class TestList < ResourceList
       PATH = '/catalog/tests'
       API_VERSION = :v3
+
+      QUERY_PARAMS = { id: Integer, name: String }
+      generate_non_enum_params_query_methods(params: QUERY_PARAMS)
     end
 
     RSpec.describe ResourceList do
@@ -38,6 +41,17 @@ module BCommerce
           Excon.stub({ method: :get, path: tests_list.path, query: tests_list.query },
                      { body: { data: page_one_tests }.to_json })
           expect(tests_list.all).to eq(page_one_tests)
+        end
+      end
+
+      describe '#where' do
+        it 'sets the filters from the passed hash' do
+          expect{ tests_list.where(id: { in: [12, 3] }, name: { like: 'hora' }) }.to\
+            change{ tests_list.query }.to({ "id:in" => '12,3', "name:like" => 'hora' })
+        end
+
+        it 'returns self' do
+          expect(tests_list.where()).to be(tests_list)
         end
       end
     end

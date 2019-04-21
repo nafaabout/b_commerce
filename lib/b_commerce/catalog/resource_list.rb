@@ -12,6 +12,21 @@ module BCommerce
         response_data(response: resp)
       end
 
+      def where(filters = {})
+        filters.each do |filter, value|
+          send(filter, value)
+        end
+        self
+      end
+
+      def create
+
+      end
+
+      def delete
+
+      end
+
       protected
 
       def response_data(response:)
