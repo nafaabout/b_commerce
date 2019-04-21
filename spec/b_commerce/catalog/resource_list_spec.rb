@@ -1,6 +1,10 @@
 module BCommerce
   module Catalog
-    class TestList < ResourceList
+    class TestResource < Resource
+
+    end
+
+    class TestResourceList < ResourceList
       PATH = '/catalog/tests'
       API_VERSION = :v3
 
@@ -9,7 +13,7 @@ module BCommerce
     end
 
     RSpec.describe ResourceList do
-      let(:tests_list){ TestList.new }
+      let(:tests_list){ TestResourceList.new }
 
       specify 'NUMBER_FILTERS is [:min, :max, :greater, :less, :in, :not_in]' do
         expect(ResourceList::NUMBER_FILTERS).to eq([:min, :max, :greater, :less, :in, :not_in])
@@ -52,6 +56,27 @@ module BCommerce
 
         it 'returns self' do
           expect(tests_list.where()).to be(tests_list)
+        end
+      end
+
+      describe '#create' do
+        let(:attrs){ { id: rand(100), name: rand.to_s } }
+        let(:test_resource){ TestResource.new(attrs) }
+
+        it 'creates an instance of the resource with the given args' do
+          expect(TestResource).to receive(:new).with(attrs).and_return(test_resource)
+          tests_list.create(attrs)
+        end
+
+        it 'saves it to the store' do
+          expect(test_resource).to receive(:save)
+          expect(TestResource).to receive(:new).and_return(test_resource)
+          tests_list.create({})
+        end
+
+        it 'returns the created resource' do
+          allow(TestResource).to receive(:new).and_return(test_resource)
+          expect(tests_list.create).to be(test_resource)
         end
       end
     end

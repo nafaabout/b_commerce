@@ -19,8 +19,10 @@ module BCommerce
         self
       end
 
-      def create
-
+      def create(attrs = {})
+        resource = resource_class.new(attrs)
+        resource.save
+        resource
       end
 
       def delete
@@ -32,6 +34,13 @@ module BCommerce
       def response_data(response:)
         resources = JSON(response.body, symbolize_names: true)
         resources[:data] if resources
+      end
+
+      def resource_class
+        return @resource_class if @resource_class
+        class_name = self.class.to_s
+        class_name['List'] = ''
+        @resource_class = eval(class_name)
       end
     end
   end
