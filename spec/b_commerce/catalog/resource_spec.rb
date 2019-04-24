@@ -166,17 +166,65 @@ module BCommerce
             end
           end
 
+          context 'IF attribute value is in given range' do
+            it 'returns true' do
+              some_resource.attributes[:inventory_level] = rand(0..100)
+              expect(some_resource.valid_inventory_level?).to be true
+            end
+          end
+
           context 'IF attribute value is NOT in given range' do
             it 'returns false' do
-              some_resource.attributes[:inventory_level] = 101
+              some_resource.attributes[:inventory_level] = rand(101..1000)
               expect(some_resource.valid_inventory_level?).to be false
-              some_resource.attributes[:inventory_level] = -2
+              some_resource.attributes[:inventory_level] = rand(-100..-1)
               expect(some_resource.valid_inventory_level?).to be false
             end
           end
         end
 
-        context 'FOR Float attribute'
+        context 'FOR Float attribute' do
+          before do
+            SomeResource.attribute :weight, type: Float, range: (0..100)
+          end
+
+          it 'generates valid_#{attr}? method' do
+            expect(some_resource).to respond_to(:valid_weight?)
+          end
+
+          context 'IF attribute value is a Float' do
+            it 'returns true' do
+              some_resource.attributes[:weight] = '44'
+              expect(some_resource.valid_weight?).to be true
+              some_resource.attributes[:weight] = 34
+              expect(some_resource.valid_weight?).to be true
+            end
+          end
+
+          context 'IF attribute value is NOT a Float' do
+            it 'returns false' do
+              some_resource.attributes[:weight] = 'er2'
+              expect(some_resource.valid_weight?).to be false
+            end
+          end
+
+          context 'IF attribute value is in given range' do
+            it 'returns true' do
+              some_resource.attributes[:weight] = 10.5
+              expect(some_resource.valid_weight?).to be true
+            end
+          end
+
+          context 'IF attribute value is NOT in given range' do
+            it 'returns false' do
+              some_resource.attributes[:weight] = 101.6
+              expect(some_resource.valid_weight?).to be false
+              some_resource.attributes[:weight] = -2
+              expect(some_resource.valid_weight?).to be false
+            end
+          end
+        end
+
         context 'FOR DateTime attribute'
       end
 

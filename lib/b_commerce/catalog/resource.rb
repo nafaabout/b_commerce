@@ -82,9 +82,13 @@ module BCommerce
 
         def define_float_attribute(attr, options)
           define_method("valid_#{attr}?") do
-            return false unless value.is_a?(String) || value.is_a?(Numeric)
             value = attributes[attr]
-            valid_float?(value)
+            return false unless value.is_a?(String) || value.is_a?(Numeric)
+            valid = valid_float?(value)
+            if valid && options[:range]
+              valid = options[:range].include?(value.to_f)
+            end
+            valid
           end
         end
 
