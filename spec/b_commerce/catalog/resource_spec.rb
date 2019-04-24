@@ -2,11 +2,6 @@ module BCommerce
   module Catalog
 
     class SomeResource < Resource
-      attribute :type, values: ['physical', 'digital']
-      attribute :name, type: String, length: 1..255
-      attribute :categories, type: Array, values_type: Integer
-      attribute :is_visible, values: BOOLEAN
-
 
       private
       def validate_custom_fields
@@ -24,6 +19,10 @@ module BCommerce
         let(:some_resource){ SomeResource.new }
 
         context 'FOR Enum attribute' do
+          before do
+            SomeResource.attribute :type, values: ['physical', 'digital']
+          end
+
           it 'generates valid_#{attr}? method' do
             expect(some_resource).to respond_to(:valid_type?)
           end
@@ -44,6 +43,10 @@ module BCommerce
         end
 
         context 'FOR string attribute' do
+          before do
+            SomeResource.attribute :name, type: String, length: 1..255
+          end
+
           it 'generates valid_#{attr}? method' do
             expect(some_resource).to respond_to(:valid_name?)
           end
@@ -66,6 +69,10 @@ module BCommerce
         end
 
         context 'FOR Array attribute' do
+          before do
+            SomeResource.attribute :categories, type: Array, values_type: Integer
+          end
+
           it 'generates valid_#{attr}? method' do
             expect(some_resource).to respond_to(:valid_categories?)
           end
@@ -106,6 +113,10 @@ module BCommerce
         end
 
         context 'FOR Boolean attribute' do
+          before do
+            SomeResource.attribute :is_visible, values: BOOLEAN
+          end
+
           it 'generates valid_#{attr}? method' do
             expect(some_resource).to respond_to(:valid_is_visible?)
           end
@@ -128,7 +139,43 @@ module BCommerce
           end
         end
 
-        context 'FOR Integer attribute'
+        context 'FOR Integer attribute' do
+          before do
+            SomeResource.attribute :inventory_level, type: Integer, range: (0..100)
+          end
+
+          it 'generates valid_#{attr}? method' do
+            expect(some_resource).to respond_to(:valid_inventory_level?)
+          end
+
+          context 'IF attribute value is an Integer' do
+            it 'returns true' do
+              some_resource.attributes[:inventory_level] = '44'
+              expect(some_resource.valid_inventory_level?).to be true
+              some_resource.attributes[:inventory_level] = 34
+              expect(some_resource.valid_inventory_level?).to be true
+            end
+          end
+
+          context 'IF attribute value is NOT an Integer' do
+            it 'returns false' do
+              some_resource.attributes[:inventory_level] = 'er2'
+              expect(some_resource.valid_inventory_level?).to be false
+              some_resource.attributes[:inventory_level] = 2.4
+              expect(some_resource.valid_inventory_level?).to be false
+            end
+          end
+
+          context 'IF attribute value is NOT in given range' do
+            it 'returns false' do
+              some_resource.attributes[:inventory_level] = 101
+              expect(some_resource.valid_inventory_level?).to be false
+              some_resource.attributes[:inventory_level] = -2
+              expect(some_resource.valid_inventory_level?).to be false
+            end
+          end
+        end
+
         context 'FOR Float attribute'
         context 'FOR DateTime attribute'
       end

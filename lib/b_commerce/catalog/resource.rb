@@ -90,8 +90,8 @@ module BCommerce
 
         def define_integer_attribute(attr, options)
           define_method("valid_#{attr}?") do
-            return false unless value.is_a?(String) || value.is_a?(Numeric)
             value = attributes[attr]
+            return false unless value.is_a?(String) || value.is_a?(Numeric)
             valid = valid_integer?(value)
             if valid && options[:range]
               valid = options[:range].include? value.to_i
@@ -100,15 +100,22 @@ module BCommerce
           end
         end
 
-        def valid_float?(value)
-          value.to_f.to_s == value.to_s
-        end
-
-        def valid_integer?(value)
-          valid_float?(value) && value.to_i == value.to_f
-        end
       end
 
+      private
+
+      def valid_float?(value)
+        Float(value)
+        true
+      rescue
+        false
+      end
+
+      def valid_integer?(value)
+        Integer(value).to_s == value.to_s
+      rescue
+        false
+      end
 
     end
   end
