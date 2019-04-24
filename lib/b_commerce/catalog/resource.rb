@@ -30,7 +30,7 @@ module BCommerce
 
         def define_enum_attribute(attr, options)
           define_method("valid_#{attr}?") do
-            options[:values].include?(attributes[attr].to_s)
+            options[:values].include?(attributes[attr])
           end
         end
 

@@ -5,6 +5,7 @@ module BCommerce
       attribute :type, values: ['physical', 'digital']
       attribute :name, type: String, length: 1..255
       attribute :categories, type: Array, values_type: Integer
+      attribute :is_visible, values: BOOLEAN
 
 
       private
@@ -23,7 +24,7 @@ module BCommerce
         let(:some_resource){ SomeResource.new }
 
         context 'FOR Enum attribute' do
-          it 'generates validation method' do
+          it 'generates valid_#{attr}? method' do
             expect(some_resource).to respond_to(:valid_type?)
           end
 
@@ -43,7 +44,7 @@ module BCommerce
         end
 
         context 'FOR string attribute' do
-          it 'generates validation method' do
+          it 'generates valid_#{attr}? method' do
             expect(some_resource).to respond_to(:valid_name?)
           end
 
@@ -65,7 +66,7 @@ module BCommerce
         end
 
         context 'FOR Array attribute' do
-          it 'generates validation method' do
+          it 'generates valid_#{attr}? method' do
             expect(some_resource).to respond_to(:valid_categories?)
           end
 
@@ -104,7 +105,29 @@ module BCommerce
           end
         end
 
-        context 'FOR Boolean attribute'
+        context 'FOR Boolean attribute' do
+          it 'generates valid_#{attr}? method' do
+            expect(some_resource).to respond_to(:valid_is_visible?)
+          end
+
+          context 'IF attribute value is a Boolean' do
+            specify 'generated method returns true' do
+              BOOLEAN.each do |val|
+                some_resource.attributes[:is_visible] = val
+                expect(some_resource.valid_is_visible?).to be(true),\
+                  "#{val.inspect} not valid, valid values are #{BOOLEAN.inspect}"
+              end
+            end
+          end
+
+          context 'IF attribute value is not a Boolean' do
+            specify 'generated method returns true' do
+              some_resource.attributes[:is_visible] = 'true'
+              expect(some_resource.valid_is_visible?).to be false
+            end
+          end
+        end
+
         context 'FOR Integer attribute'
         context 'FOR Float attribute'
         context 'FOR DateTime attribute'
