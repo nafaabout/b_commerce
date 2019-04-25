@@ -225,7 +225,29 @@ module BCommerce
           end
         end
 
-        context 'FOR DateTime attribute'
+        context 'FOR DateTime attribute' do
+          before do
+            SomeResource.attribute :preorder_release_date, type: DateTime
+          end
+
+          it 'generates valid_#{attr}? method' do
+            expect(some_resource).to respond_to(:valid_preorder_release_date?)
+          end
+
+          context 'IF attribute value is a valid datetime string of the format ("%Y-%m-%dT%H:%M:%S%z")' do
+            it 'returns true' do
+              some_resource.attributes[:preorder_release_date] = '2019-04-24T19:08:48+01:00'
+              expect(some_resource.valid_preorder_release_date?).to be true
+            end
+          end
+
+          context 'IF attribute value is NOT a valid datetime' do
+            it 'returns false' do
+              some_resource.attributes[:preorder_release_date] = '2019-04-24 19:08:48'
+              expect(some_resource.valid_preorder_release_date?).to be false
+            end
+          end
+        end
       end
 
       describe '#new' do

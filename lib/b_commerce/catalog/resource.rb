@@ -73,13 +73,6 @@ module BCommerce
           end
         end
 
-        def valid_datetime?(value)
-          DateTime.strptime(value)
-          true
-        rescue
-          false
-        end
-
         def define_float_attribute(attr, options)
           define_method("valid_#{attr}?") do
             value = attributes[attr]
@@ -117,6 +110,13 @@ module BCommerce
 
       def valid_integer?(value)
         Integer(value).to_s == value.to_s
+      rescue
+        false
+      end
+
+      def valid_datetime?(value)
+        DateTime.strptime(value)
+        true
       rescue
         false
       end
