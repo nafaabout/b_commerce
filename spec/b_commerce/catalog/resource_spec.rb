@@ -271,8 +271,19 @@ module BCommerce
           end
 
           context 'IF attribute value is NOT a valid datetime' do
+            let(:invalid_date){ '2019-04-24 19:08:48' }
+            before do
+              resource.attributes[:preorder_release_date] = invalid_date
+            end
+
+            specify 'valid_#{attr}? method sets #errors[attr]' do
+              resource.valid_preorder_release_date?
+              expect(resource.errors[:preorder_release_date]).to eq("#{invalid_date.inspect} is not valid Date for :preorder_release_date, " +
+                                                                    "valid value should be a DateTime instance or a string of the format " +
+                                                                    "#{VALID_DATE_FORMAT.inspect} like #{DateTime.now.to_s.inspect}")
+            end
+
             it 'returns false' do
-              resource.attributes[:preorder_release_date] = '2019-04-24 19:08:48'
               expect(resource.valid_preorder_release_date?).to be false
             end
           end

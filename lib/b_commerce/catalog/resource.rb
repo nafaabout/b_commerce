@@ -1,5 +1,6 @@
 module BCommerce
   BOOLEAN = [true, false, 1, 0]
+  VALID_DATE_FORMAT = '%Y-%m-%dT%H:%M:%S%:z'
 
   module Catalog
     class Resource < Base
@@ -87,17 +88,34 @@ module BCommerce
             if valid && length_range
               valid = length_range.include?(attr_value.to_s.length)
             end
-            if !valid
-              errors[attr.to_sym] = "#{attr.inspect} should be a" +
+
+            if valid
+              errors.delete(attr)
+            else
+              errors[attr] = "#{attr.inspect} should be a" +
                 " string of length between #{length_range.min.inspect} and #{length_range.max.inspect}"
             end
+
             !errors.key?(attr)
           end
         end
 
         def define_datetime_attribute(attr, options)
           define_method("valid_#{attr}?") do
-            attributes[attr].is_a?(DateTime) || valid_datetime?(attributes[attr])
+            attr = attr.to_sym
+            value = attributes[attr]
+
+            if value.is_a?(DateTime)
+              errors.delete(attr)
+            elsif value.is_a?(String) && valid_datetime?(attributes[attr])
+              errors.delete(attr)
+            else
+              errors[attr] = "#{value.inspect} is not valid Date for #{attr.inspect}, " +
+                "valid value should be a DateTime instance or a string of the format " +
+                "#{VALID_DATE_FORMAT.inspect} like #{DateTime.now.to_s.inspect}"
+            end
+
+            !errors.key?(attr)
           end
         end
 
