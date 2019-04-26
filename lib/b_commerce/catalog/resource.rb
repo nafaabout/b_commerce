@@ -47,10 +47,15 @@ module BCommerce
 
         def define_enum_attribute(attr, options)
           define_method("valid_#{attr}?") do
+            attr = attr.to_sym
             valid_values = options[:values]
-            if(!valid_values.include?(attributes[attr]))
-              errors[attr.to_sym] = "invalid value #{attributes[attr].inspect} for attribute :type, valid values are #{valid_values.inspect}"
+            value = attributes[attr]
+
+            errors.delete(attr)
+            if(!valid_values.include?(value))
+              errors[attr] = "Invalid value #{value.inspect} for attribute #{attr.inspect}, valid values are #{valid_values.inspect}"
             end
+
             !errors.key?(attr)
           end
         end
@@ -137,13 +142,21 @@ module BCommerce
 
         def define_integer_attribute(attr, options)
           define_method("valid_#{attr}?") do
+            attr = attr.to_sym
             value = attributes[attr]
             return false unless value.is_a?(String) || value.is_a?(Numeric)
-            valid = valid_integer?(value)
-            if valid && options[:range]
-              valid = options[:range].include? value.to_i
+
+            errors.delete(attr)
+            range = options[:range]
+
+            if !valid_integer?(value)
+              errors[attr] = "#{value.inspect} is not a valid value for" +
+                " #{attr.inspect}, it must be an Integer"
+            elsif range && !range.include?(value.to_i)
+              errors[attr] = "#{value.inspect} is out of range, #{attr.inspect} must be an Integer between #{range.min} and #{range.max}"
             end
-            valid
+
+            !errors.key?(attr)
           end
         end
 

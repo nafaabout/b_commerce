@@ -44,9 +44,10 @@ module BCommerce
             end
 
             specify 'valid_#{attr}? method sets #errors[attr]' do
-              resource.attributes[:type] = 'invalid_value'
+              value = 'some value'
+              resource.attributes[:type] = value
               resource.valid_type?
-              expect(resource.errors[:type ]).to eq("invalid value #{'invalid_value'.inspect} for attribute :type, valid values are #{valid_types.inspect}")
+              expect(resource.errors[:type ]).to eq("Invalid value #{value.inspect} for attribute :type, valid values are #{valid_types.inspect}")
             end
 
           end
@@ -62,10 +63,10 @@ module BCommerce
           end
 
           context 'IF attribute value is NOT a string' do
-            let(:invalid_value){ [:an_array, :not_a_string] }
+            let(:value){ [:an_array, :not_a_string] }
 
             before do
-              resource.attributes[:name] = invalid_value
+              resource.attributes[:name] = value
             end
 
             specify 'valid_#{attr}? method returns false' do
@@ -74,7 +75,7 @@ module BCommerce
 
             specify 'valid_#{attr}? method sets errors[attr]' do
               resource.valid_name?
-              expect(resource.errors[:name]).to eq("#{invalid_value.inspect} is not a valid value, :name must be a String.")
+              expect(resource.errors[:name]).to eq("#{value.inspect} is not a valid value, :name must be a String.")
             end
           end
 
@@ -193,6 +194,15 @@ module BCommerce
           end
 
           context 'IF attribute value is NOT an Integer' do
+            specify 'valid_#{attr}? method sets #errors[attr]' do
+              value = 'df3'
+              resource.attributes[:inventory_level] = value
+              resource.valid_inventory_level?
+              expect(resource.errors[:inventory_level]).to\
+                eq("#{value.inspect} is not a valid value for" +
+                   " :inventory_level, it must be an Integer")
+            end
+
             it 'returns false' do
               resource.attributes[:inventory_level] = 'er2'
               expect(resource.valid_inventory_level?).to be false
@@ -209,6 +219,14 @@ module BCommerce
           end
 
           context 'IF attribute value is NOT in given range' do
+            specify 'valid_#{attr}? method sets #errors[attr]' do
+              value = 101
+              resource.attributes[:inventory_level] = value
+              resource.valid_inventory_level?
+              expect(resource.errors[:inventory_level]).to\
+                eq("#{value.inspect} is out of range, :inventory_level must be an Integer between 0 and 100")
+            end
+
             it 'returns false' do
               resource.attributes[:inventory_level] = rand(101..1000)
               expect(resource.valid_inventory_level?).to be false
@@ -237,15 +255,15 @@ module BCommerce
           end
 
           context 'IF attribute value is NOT a Float' do
-            let(:invalid_value){ 'er2' }
+            let(:value){ 'er2' }
 
             before do
-              resource.attributes[:weight] = invalid_value
+              resource.attributes[:weight] = value
             end
 
             specify 'valid_#{attr}? method sets #errors[attr]' do
               resource.valid_weight?
-              expect(resource.errors[:weight]).to eq("#{invalid_value.inspect} is not valid value for :weight, it should be a Float")
+              expect(resource.errors[:weight]).to eq("#{value.inspect} is not valid value for :weight, it should be a Float")
             end
 
             it 'returns false' do
@@ -262,10 +280,10 @@ module BCommerce
 
           context 'IF attribute value is NOT in given range' do
             specify 'valid_#{attr}? method sets #errors[attr]' do
-              invalid_value = 101.6
-              resource.attributes[:weight] = invalid_value
+              value = 101.6
+              resource.attributes[:weight] = value
               resource.valid_weight?
-              expect(resource.errors[:weight]).to eq("#{invalid_value.inspect} is out of range, :weight should be a Float between 0 and 100")
+              expect(resource.errors[:weight]).to eq("#{value.inspect} is out of range, :weight should be a Float between 0 and 100")
             end
 
             it 'returns false' do

@@ -2,6 +2,7 @@ $:.unshift(File.dirname(__FILE__)) unless $:.include?(File.dirname(__FILE__))
 
 require 'excon'
 require 'json' unless self.class.const_defined?('JSON')
+require 'date'
 require 'byebug'
 
 require 'b_commerce/version'
