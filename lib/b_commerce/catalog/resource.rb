@@ -121,13 +121,20 @@ module BCommerce
 
         def define_float_attribute(attr, options)
           define_method("valid_#{attr}?") do
+            attr = attr.to_sym
             value = attributes[attr]
             return false unless value.is_a?(String) || value.is_a?(Numeric)
-            valid = valid_float?(value)
-            if valid && options[:range]
-              valid = options[:range].include?(value.to_f)
+
+            range = options[:range]
+            errors.delete(attr)
+
+            if !valid_float?(value)
+              errors[attr] = "#{value.inspect} is not valid value for #{attr.inspect}, it should be a Float"
+            elsif range && !range.include?(value.to_f)
+              errors[attr] = "#{value.inspect} is out of range, #{attr.inspect} should be a Float between #{range.min} and #{range.max}"
             end
-            valid
+
+            !errors.key?(attr)
           end
         end
 

@@ -231,8 +231,18 @@ module BCommerce
           end
 
           context 'IF attribute value is NOT a Float' do
+            let(:invalid_value){ 'er2' }
+
+            before do
+              resource.attributes[:weight] = invalid_value
+            end
+
+            specify 'valid_#{attr}? method sets #errors[attr]' do
+              resource.valid_weight?
+              expect(resource.errors[:weight]).to eq("#{invalid_value.inspect} is not valid value for :weight, it should be a Float")
+            end
+
             it 'returns false' do
-              resource.attributes[:weight] = 'er2'
               expect(resource.valid_weight?).to be false
             end
           end
@@ -245,6 +255,13 @@ module BCommerce
           end
 
           context 'IF attribute value is NOT in given range' do
+            specify 'valid_#{attr}? method sets #errors[attr]' do
+              invalid_value = 101.6
+              resource.attributes[:weight] = invalid_value
+              resource.valid_weight?
+              expect(resource.errors[:weight]).to eq("#{invalid_value.inspect} is out of range, :weight should be a Float between 0 and 100")
+            end
+
             it 'returns false' do
               resource.attributes[:weight] = 101.6
               expect(resource.valid_weight?).to be false
