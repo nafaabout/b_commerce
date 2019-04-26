@@ -16,7 +16,22 @@ module BCommerce
 
       end
 
+      def valid?
+        self.class.attributes.each do |attr|
+          return false if !send(:"valid_#{attr}?")
+        end
+        true
+      end
+
+      def errors
+        @errors ||= {}
+      end
+
       class << self
+        def attributes
+          @attributes ||= []
+        end
+
         def attribute(attr, options = {})
           if options[:type]
             type = options[:type].to_s.downcase
@@ -24,13 +39,18 @@ module BCommerce
           elsif(options[:values])
             define_enum_attribute(attr, options)
           end
+          self.attributes.push(attr.to_sym)
         end
 
         private
 
         def define_enum_attribute(attr, options)
           define_method("valid_#{attr}?") do
-            options[:values].include?(attributes[attr])
+            valid_values = options[:values]
+            if(!valid_values.include?(attributes[attr]))
+              errors[attr.to_sym] = "invalid value #{attributes[attr].inspect} for attribute :type, valid values are #{valid_values.inspect}"
+            end
+            !errors.key?(attr)
           end
         end
 
@@ -59,11 +79,19 @@ module BCommerce
 
         def define_string_attribute(attr, options)
           define_method("valid_#{attr}?") do
-            if(options[:length])
-              options[:length].include?(attributes[attr].to_s.length)
-            else
-              attributes[attr].is_a?(String)
+            attr = attr.to_sym
+            length_range = options[:length]
+            attr_value = attributes[attr]
+
+            valid = attr_value.is_a?(String)
+            if valid && length_range
+              valid = length_range.include?(attr_value.to_s.length)
             end
+            if !valid
+              errors[attr.to_sym] = "#{attr.inspect} should be a" +
+                " string of length between #{length_range.min.inspect} and #{length_range.max.inspect}"
+            end
+            !errors.key?(attr)
           end
         end
 
