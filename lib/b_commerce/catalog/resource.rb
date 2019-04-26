@@ -67,18 +67,42 @@ module BCommerce
 
           if options[:values_type]
             define_method("valid_#{attr}?") do
-              return false unless attributes[attr].is_a?(Array)
-              type_method = options[:values_type].to_s
-              attributes[attr].all? do |v|
-                send(type_method, v)
-                true
-              rescue StandardError
-                false
+              attr = attr.to_sym
+              value = attributes[attr]
+              type = options[:values_type]
+
+              errors.delete(attr)
+
+              if !value.is_a?(Array)
+                errors[attr] = "#{value.inspect} is invalid, #{attr.inspect} must be an Array"
+                if type
+                  errors[attr] += " of #{type.inspect}s"
+                end
+              else
+                type_method = type.to_s
+                value.all? do |v|
+                  send(type_method, v)
+                rescue StandardError
+                  errors[attr] = "#{v.inspect} is not valid for #{attr.inspect}," +
+                    " all values must be #{type.inspect}s"
+                end
               end
+
+              !errors.key?(attr)
             end
           elsif options.key?(:validate_with)
             define_method(:"valid_#{attr}?") do
-              send(options[:validate_with])
+              attr = attr.to_sym
+              value = attributes[attr]
+              validation_meth = options[:validate_with]
+
+              errors.delete(attr)
+
+              if !send(validation_meth)
+                errors[attr] = "#{value.inspect} is invalid for #{attr.inspect} per #{validation_meth.inspect} method"
+              end
+
+              !errors.key?(attr)
             end
           end
         end

@@ -115,6 +115,23 @@ module BCommerce
 
           context 'IF :values_type passed' do
 
+            context 'AND values is not an Array' do
+              let(:value) { { value: :not_array } }
+
+              before do
+                resource.attributes[:categories] = value
+              end
+
+              specify 'valid_#{attr}? returns false' do
+                expect(resource.valid_categories?).to be false
+              end
+
+              specify 'valid_#{attr}? sets errors[attr]' do
+                resource.valid_categories?
+                expect(resource.errors[:categories]).to eq("#{value.inspect} is invalid, :categories must be an Array of Integers")
+              end
+            end
+
             context 'AND all values are of the given type' do
               it 'returns true' do
                 resource.attributes[:categories] = [13, '24']
@@ -123,8 +140,21 @@ module BCommerce
             end
 
             context 'AND some values are not of the given type' do
+              let(:values) { [13, 'f4'] }
+
+              before do
+                resource.attributes[:categories] = values
+              end
+
+              specify 'valid_#{attr}? method sets #errors[attr]' do
+                resource.attributes[:categories] = values
+                resource.valid_categories?
+                expect(resource.errors[:categories]).to\
+                  eq("#{values[1].inspect} is not valid for :categories," +
+                    " all values must be #{Integer.inspect}s")
+              end
+
               it 'returns false' do
-                resource.attributes[:categories] = [13, 'f4']
                 expect(resource.valid_categories?).to be false
               end
             end
@@ -132,10 +162,23 @@ module BCommerce
 
           context 'IF :values_type NOT passed OR not a Class' do
             context 'AND :validate_with is passed' do
+              before do
+                resourceClass.attribute(:custom_fields, type: Array, validate_with: :validate_custom_fields)
+              end
+
               it 'valid_#{attr}? method calls method passed in :validate_with' do
                 expect(resource).to receive(:validate_custom_fields)
-                resourceClass.attribute(:custom_fields, type: Array, validate_with: :validate_custom_fields)
                 resource.valid_custom_fields?
+              end
+
+              context 'IF method returns false' do
+                it 'sets errors[attr]' do
+                  expect(resource).to receive(:validate_custom_fields).and_return(false)
+                  value = { name: 'Hora', size: 234 }
+                  resource.attributes[:custom_fields] = value
+                  resource.valid_custom_fields?
+                  expect(resource.errors[:custom_fields]).to eq("#{value.inspect} is invalid for :custom_fields per :validate_custom_fields method")
+                end
               end
             end
 
