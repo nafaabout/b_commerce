@@ -84,16 +84,13 @@ module BCommerce
             length_range = options[:length]
             attr_value = attributes[attr]
 
-            valid = attr_value.is_a?(String)
-            if valid && length_range
-              valid = length_range.include?(attr_value.to_s.length)
-            end
+            errors.delete(attr)
 
-            if valid
-              errors.delete(attr)
-            else
+            if !attr_value.is_a?(String)
+              errors[attr] = "#{attr_value.inspect} is not a valid value, #{attr.inspect} must be a String."
+            elsif length_range && !length_range.include?(attr_value.to_s.length)
               errors[attr] = "#{attr.inspect} should be a" +
-                " string of length between #{length_range.min.inspect} and #{length_range.max.inspect}"
+                " String of length between #{length_range.min.inspect} and #{length_range.max.inspect}"
             end
 
             !errors.key?(attr)
@@ -105,11 +102,11 @@ module BCommerce
             attr = attr.to_sym
             value = attributes[attr]
 
-            if value.is_a?(DateTime)
-              errors.delete(attr)
-            elsif value.is_a?(String) && valid_datetime?(attributes[attr])
-              errors.delete(attr)
-            else
+            errors.delete(attr)
+
+            if !value.is_a?(DateTime) &&
+                !(value.is_a?(String) && valid_datetime?(attributes[attr]))
+
               errors[attr] = "#{value.inspect} is not valid Date for #{attr.inspect}, " +
                 "valid value should be a DateTime instance or a string of the format " +
                 "#{VALID_DATE_FORMAT.inspect} like #{DateTime.now.to_s.inspect}"

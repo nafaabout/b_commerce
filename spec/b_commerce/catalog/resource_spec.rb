@@ -62,13 +62,19 @@ module BCommerce
           end
 
           context 'IF attribute value is NOT a string' do
+            let(:invalid_value){ [:an_array, :not_a_string] }
+
+            before do
+              resource.attributes[:name] = invalid_value
+            end
+
             specify 'valid_#{attr}? method returns false' do
-              resource.attributes[:name] = [:an_array, :not_a_string]
               expect(resource.valid_name?).to be false
             end
 
             specify 'valid_#{attr}? method sets errors[attr]' do
-
+              resource.valid_name?
+              expect(resource.errors[:name]).to eq("#{invalid_value.inspect} is not a valid value, :name must be a String.")
             end
           end
 
@@ -92,7 +98,7 @@ module BCommerce
               resource.attributes[:name] = 'm' * 256
               resource.valid_name?
               expect(resource.errors[:name]).to eq(":name should be a" +
-                                                        " string of length between #{1.inspect} and #{255.inspect}")
+                                                   " String of length between #{1.inspect} and #{255.inspect}")
             end
           end
         end
