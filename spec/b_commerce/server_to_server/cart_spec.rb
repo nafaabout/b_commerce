@@ -1,3 +1,4 @@
+# frozen_string_literal: true
 module BCommerce
   module ServerToServer
     RSpec.describe Cart do
@@ -20,6 +21,14 @@ module BCommerce
         attributes.each do |attr, options|
           expect(Cart.attributes[attr]).to eq(options), "expected #{options.inspect} for #{attr.inspect}, got #{Cart.attributes[attr]}"
         end
+      end
+
+      specify 'API_VERSION is :v3' do
+        expect(Cart::API_VERSION).to be('v3')
+      end
+
+      specify 'PATH is /carts' do
+        expect(Cart::PATH).to be('/carts')
       end
     end
   end
