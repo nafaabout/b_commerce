@@ -52,6 +52,25 @@ module QueryMethods
 
   end
 
+  def generate_include_param_query_method(param:, valid_values:)
+    if !['include', 'include_fields', 'exclude_fields'].include?(param.to_s)
+      raise "Invalid param name, expected one of ('include', 'include_fields', 'exclude_fields')"
+    end
+    define_method param do |*values|
+      return self if values.empty?
+      values.flatten!
+      values = values.map!{ |v| v.split(',') }
+      values.flatten!
+      invalid_values = values - valid_values
+      if invalid_values.empty?
+        query[param.to_s] = values.join(',')
+      else
+        raise BCommerce::InvalidValue.new(invalid_values, attr: param, valid_values: valid_values)
+      end
+      self
+    end
+  end
+
   module InstanceMethods
 
     def query

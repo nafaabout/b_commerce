@@ -122,17 +122,35 @@ module BCommerce
       end
     end
 
-    describe '#name for String type' do
-      before do
-        ListClass.send(:generate_non_enum_params_query_methods, params: ListClass::QUERY_PARAMS[:non_enum])
-      end
 
-      context 'WHEN passed invalid filters' do
-        it 'raises InvalidFilters error' do
-          expect{ list.name(unlike: 'hello') }.to raise_error(InvalidFilters)
+    %w(include include_fields exclude_fields).each do |param|
+      describe "Generated ##{param} method" do
+        let(:valid_values) { ['value1', 'value2'] }
+
+        before do
+          ListClass.send(:generate_include_param_query_method, param: param, valid_values: valid_values)
+        end
+
+        context 'IF passed values are valid' do
+          it 'accespts values as comma separated string' do
+            expect{ list.send(param, 'value1,value2') }.to change{ list.query }.to({param => 'value1,value2'})
+          end
+
+          it 'accespts values as array' do
+            expect{ list.send(param, ['value1', 'value2']) }.to change{ list.query }.to({param => 'value1,value2'})
+            list.query.clear
+            expect{ list.send(param, 'value1', 'value2') }.to change{ list.query }.to({param => 'value1,value2'})
+          end
+        end
+
+        context 'IF passed values are NOT valid' do
+          it 'raises error' do
+            expect{ list.send(param, 'another_value') }.to raise_error(InvalidValue)
+          end
         end
       end
     end
+
   end
 
 end
