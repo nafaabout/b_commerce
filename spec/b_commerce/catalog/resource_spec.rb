@@ -10,9 +10,9 @@ module BCommerce
       end
 
       describe '.attribute' do
-        it 'adds the name of the attribute to the .attributes array' do
+        it 'adds the attribute with its options to .attributes hash' do
           expect{ resourceClass.attribute :name, type: String, length: 1..100 }.to\
-            change{ resourceClass.attributes }.from([]).to([:name])
+            change{ resourceClass.attributes }.from({}).to({name: { type: String, length: 1..100 }})
         end
 
         context 'FOR Enum attribute' do

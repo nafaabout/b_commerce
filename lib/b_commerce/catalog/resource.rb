@@ -18,7 +18,7 @@ module BCommerce
       end
 
       def valid?
-        self.class.attributes.each do |attr|
+        self.class.attributes.each_key do |attr|
           return false if !send(:"valid_#{attr}?")
         end
         true
@@ -30,7 +30,7 @@ module BCommerce
 
       class << self
         def attributes
-          @attributes ||= []
+          @attributes ||= {}
         end
 
         def attribute(attr, options = {})
@@ -40,7 +40,7 @@ module BCommerce
           elsif(options[:values])
             define_enum_attribute(attr, options)
           end
-          self.attributes.push(attr.to_sym)
+          self.attributes[attr.to_sym] = options
         end
 
         private
