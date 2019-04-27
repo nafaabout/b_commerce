@@ -11,9 +11,11 @@ require 'b_commerce/query_methods'
 require 'b_commerce/base'
 require 'b_commerce/errors'
 
+require 'b_commerce/resource'
 require 'b_commerce/catalog/resource_list'
 
 Dir[File.join(__dir__, 'b_commerce/catalog/*.rb')].each{ |f| require f }
+Dir[File.join(__dir__, 'b_commerce/server_to_server/*.rb')].each{ |f| require f }
 
 module BCommerce
 
