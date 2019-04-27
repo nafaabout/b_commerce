@@ -37,8 +37,6 @@ module BCommerce
           categories:         Integer,
           keyword:            String,
           status:             Integer,
-          include_fields:     String,
-          exclude_fields:     String,
           price_list_id:      Integer,
           page:               Integer,
           limit:              Integer,
@@ -47,6 +45,13 @@ module BCommerce
 
       generate_enum_params_query_methods(params: QUERY_PARAMS[:enum])
       generate_non_enum_params_query_methods(params: QUERY_PARAMS[:non_enum])
+
+      valid_include_fields = %w(variants images custom_fields bulk_pricing_rules primary_image modifiers options)
+      product_fields = Product.attributes.keys - [:id]
+
+      generate_include_param_query_method(param: 'include', valid_values: valid_include_fields)
+      generate_include_param_query_method(param: 'exclude_fields', valid_values: product_fields)
+      generate_include_param_query_method(param: 'include_fields', valid_values: product_fields)
 
     end
   end
