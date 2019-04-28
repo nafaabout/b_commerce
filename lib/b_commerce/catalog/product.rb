@@ -1,6 +1,7 @@
 module BCommerce
   module Catalog
     class Product < Resource
+      PATH = '/catalog/products'
 
       attribute :name, type: String, length: 1..255
       attribute :type, values: ["physical", "digital"]

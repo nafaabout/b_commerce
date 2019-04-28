@@ -1,9 +1,12 @@
+# frozen_string_literal: true
 module BCommerce
   BOOLEAN = [true, false, 1, 0]
   VALID_DATE_FORMAT = '%Y-%m-%dT%H:%M:%S%:z'
 
   class Resource < Base
     attr_reader :attributes
+
+    API_VERSION = 'v3'
 
     def initialize(attrs = {})
       if self.class == Resource
@@ -12,8 +15,9 @@ module BCommerce
       @attributes = attrs
     end
 
-    def save
-
+    def save(validate: true)
+      return false if validate && !valid?
+      connection.request(request_hash)
     end
 
     def valid?
@@ -27,22 +31,49 @@ module BCommerce
       @errors ||= {}
     end
 
+    def query
+      @query ||= {}
+    end
+
+    def path(id: nil)
+      @path ||= if id
+                  "#{super()}/#{id}"
+                else
+                  super()
+                end
+    end
+
     class << self
       def attributes
         @attributes ||= {}
       end
 
       def attribute(attr, options = {})
+        attr = attr.to_sym
         if options[:type]
           type = options[:type].to_s.downcase
           send(:"define_#{type}_attribute", attr, options)
         elsif(options[:values])
           define_enum_attribute(attr, options)
         end
-        self.attributes[attr.to_sym] = options
+        define_setter(attr)
+        define_getter(attr)
+        self.attributes[attr] = options
       end
 
       private
+
+      def define_setter(attr)
+        define_method(:"#{attr}=") do |value|
+          attributes[attr] = value
+        end
+      end
+
+      def define_getter(attr)
+        define_method(attr) do
+          attributes[attr]
+        end
+      end
 
       def define_enum_attribute(attr, options)
         define_method("valid_#{attr}?") do
@@ -186,6 +217,43 @@ module BCommerce
     end
 
     private
+
+    def request_hash
+      request = {
+        method: method,
+        path: path(id: attributes[:id]),
+        headers: headers
+      }
+      request[:body]   = attributes.to_json if set_request_body?
+      request[:query]  = query if set_request_query?
+      request
+    end
+
+    def method
+      if post?
+        :post
+      elsif put?
+        :put
+      else
+        :get
+      end
+    end
+
+    def set_request_body?
+      post? || put?
+    end
+
+    def post?
+      !attributes[:id]
+    end
+
+    def put?
+      !!attributes[:id]
+    end
+
+    def set_request_query?
+      !!@set_request_query
+    end
 
     def valid_float?(value)
       Float(value)

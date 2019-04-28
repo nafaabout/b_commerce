@@ -3,6 +3,13 @@ module BCommerce
   RSpec.describe Resource do
     let(:resourceClass){ Class.new(Resource) }
     let(:resource){ resourceClass.new }
+    let(:store_hash){ rand.to_s }
+
+    before do
+      BCommerce::Base.setup(client_id: 'id', store_hash: store_hash, auth_token: 'token')
+      resourceClass::API_VERSION = 'v3'
+      resourceClass::PATH = '/resources'
+    end
 
     it 'inherits from BCommerce::Base' do
       expect(Resource).to be < Base
@@ -12,6 +19,16 @@ module BCommerce
       it 'adds the attribute with its options to .attributes hash' do
         expect{ resourceClass.attribute :name, type: String, length: 1..100 }.to\
           change{ resourceClass.attributes }.from({}).to({name: { type: String, length: 1..100 }})
+      end
+
+      it 'defines setter method for the attribute' do
+        expect{ resourceClass.attribute :name, type: String, length: 1..100 }.to\
+          change{ resource.respond_to?(:name=) }.from(false).to(true)
+      end
+
+      it 'defines getter method for the attribute' do
+        expect{ resourceClass.attribute :name, type: String, length: 1..100 }.to\
+          change{ resource.respond_to?(:name) }.from(false).to(true)
       end
 
       context 'FOR Enum attribute' do
@@ -373,6 +390,23 @@ module BCommerce
       end
     end
 
+    describe '#path' do
+      let(:resource_path){ "/stores/#{store_hash}/#{resourceClass::API_VERSION}/resources" }
+
+      context 'IF passed :id' do
+        it 'returns STORE_PATH/PATH/id' do
+          id = rand(100)
+          expect(resource.path(id: id)).to eq("#{resource_path}/#{id}")
+        end
+      end
+
+      context 'IF NOT passed :id' do
+        it 'returns STORE_PATH/PATH' do
+          expect(resource.path(id: nil)).to eq(resource_path)
+        end
+      end
+    end
+
     describe '#valid?' do
       context 'IF all the attributes are valid' do
         it 'returns true' do
@@ -411,7 +445,65 @@ module BCommerce
       end
     end
 
-    describe '#save'
+    describe '#save' do
+      before do
+        allow(resource.connection).to receive(:request)
+      end
+
+      context 'IF passed validate: true' do
+        it 'validates attributes before it save' do
+          expect(resource).to receive(:valid?).and_return(false)
+          resource.save
+        end
+
+        context 'AND attributes are valid' do
+          it 'calls the API with the resource attributes' do
+            expect(resource.connection).to receive(:request).with(method: :post,
+                                                                  path: resource.path,
+                                                                  headers: resource.headers,
+                                                                  body: resource.attributes.to_json)
+            resource.save(validate: false)
+          end
+        end
+
+        context 'AND attributes are NOT valid' do
+          it 'does not call the API' do
+            expect(resource).to receive(:valid?).and_return(false)
+            expect(resource.connection).to_not receive(:request)
+            resource.save(validate: true)
+          end
+
+          it 'returns false' do
+            expect(resource).to receive(:valid?).and_return(false)
+            expect(resource.save(validate: true)).to be false
+          end
+        end
+      end
+
+      context 'IF passed validate: false' do
+        it 'does not validate attributes' do
+          expect(resource).to_not receive(:valid?)
+          resource.save(validate: false)
+        end
+      end
+
+      context 'IF attributes[:id] is set' do
+        it 'sends a PUT request' do
+          resource.attributes[:id] = rand(100)
+          expect(resource.connection).to receive(:request).with(hash_including(method: :put))
+          resource.save(validate: false)
+        end
+      end
+
+      context 'IF attributes[:id] is NOT set' do
+        it 'sends a POST request' do
+          resource.attributes[:id] = nil
+          expect(resource.connection).to receive(:request).with(hash_including(method: :post))
+          resource.save(validate: false)
+        end
+      end
+    end
+
     describe '#update'
     describe '#delete'
   end

@@ -1,12 +1,11 @@
 module BCommerce
   module Catalog
     class TestResource < Resource
-
+      PATH = '/catalog/tests'
     end
 
     class TestResourceList < ResourceList
       PATH = '/catalog/tests'
-      API_VERSION = :v3
 
       QUERY_PARAMS = { id: Integer, name: String }
       generate_non_enum_params_query_methods(params: QUERY_PARAMS)
@@ -63,6 +62,10 @@ module BCommerce
       describe '#create' do
         let(:attrs){ { id: rand(100), name: rand.to_s } }
         let(:test_resource){ TestResource.new(attrs) }
+
+        before do
+          allow(test_resource).to receive(:save)
+        end
 
         it 'creates an instance of the resource with the given args' do
           expect(TestResource).to receive(:new).with(attrs).and_return(test_resource)

@@ -1,7 +1,9 @@
+# frozen_string_literal: true
 module BCommerce
   module Catalog
     class ResourceList < Base
       extend QueryMethods
+      API_VERSION = 'v3'
 
       ARRAY_FILTERS  = [:in, :not_in]
       NUMBER_FILTERS = [:min, :max, :greater, :less] + ARRAY_FILTERS
