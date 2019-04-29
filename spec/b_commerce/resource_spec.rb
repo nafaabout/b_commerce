@@ -395,6 +395,37 @@ module BCommerce
           expect(resource).to respond_to(:valid_inventory_level?)
         end
 
+        context 'IF attribute is required' do
+          before do
+            resourceClass.attribute :inventory_level, type: Integer, range: (0..100), required: true
+          end
+
+          context 'AND attributes[attr] is missing' do
+            specify 'valid_#{attr}? returns false' do
+              resource.attributes[:inventory_level] = nil
+              expect(resource.valid_inventory_level?).to be false
+            end
+
+            specify 'sets errors[attr]' do
+              resource.attributes[:inventory_level] = nil
+              resource.valid_inventory_level?
+              expect(resource.errors[:inventory_level]).to eq("missing value for required attribute :inventory_level")
+            end
+          end
+        end
+
+        context 'IF attribute is NOT required' do
+          before do
+            resourceClass.attribute :inventory_level, type: Array, required: false, values_type: Integer
+          end
+
+          context 'AND attributes[attr] is missing' do
+            specify 'valid_#{attr}? returns true' do
+              resource.attributes[:inventory_level] = nil
+              expect(resource.valid_inventory_level?).to be true
+            end
+          end
+        end
         context 'IF attribute value is an Integer' do
           it 'returns true' do
             resource.attributes[:inventory_level] = '44'

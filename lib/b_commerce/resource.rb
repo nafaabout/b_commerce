@@ -296,7 +296,11 @@ module BCommerce
           errors.delete(attr)
           range = options[:range]
 
-          if !valid_integer?(value)
+          if value.nil?
+            if options[:required]
+              errors[attr] = "missing value for required attribute #{attr.inspect}"
+            end
+          elsif !valid_integer?(value)
             errors[attr] = "#{value.inspect} is not a valid value for" +
               " #{attr.inspect}, it must be an Integer"
           elsif range && !range.include?(value.to_i)
