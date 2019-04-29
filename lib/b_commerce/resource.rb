@@ -143,7 +143,11 @@ module BCommerce
           value = attributes[attr]
 
           errors.delete(attr)
-          if(!valid_values.include?(value))
+          if(value.nil? || value.to_s.empty?)
+            if options[:required]
+              errors[attr] = "missing value for required attribute #{attr.inspect}"
+            end
+          elsif(!valid_values.include?(value))
             errors[attr] = "Invalid value #{value.inspect} for attribute #{attr.inspect}, valid values are #{valid_values.inspect}"
           end
 
@@ -163,7 +167,11 @@ module BCommerce
 
           errors.delete(attr)
 
-          if !send(validation_meth)
+          if(value.nil? || value.to_s.empty?)
+            if options[:required]
+              errors[attr] = "missing value for required attribute #{attr.inspect}"
+            end
+          elsif !send(validation_meth)
             errors[attr] = "#{value.inspect} is invalid for #{attr.inspect} per #{validation_meth.inspect} method"
           end
 
@@ -184,7 +192,13 @@ module BCommerce
 
             errors.delete(attr)
 
-            if !value.is_a?(Array)
+            if value.nil? || Array(value).empty?
+              if options[:required]
+                errors[attr] = "missing value for required attribute #{attr.inspect}"
+              else
+                return true
+              end
+            elsif !value.is_a?(Array)
               errors[attr] = "#{value.inspect} is invalid, #{attr.inspect} must be an Array"
               if type
                 errors[attr] += " of #{type.inspect}s"

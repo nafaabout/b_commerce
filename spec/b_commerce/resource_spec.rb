@@ -40,12 +40,45 @@ module BCommerce
 
       context 'FOR Enum attribute' do
         let(:valid_types){ ['physical', 'digital'] }
+
         before do
           resourceClass.attribute :type, values: valid_types
         end
 
         it 'generates valid_#{attr}? method' do
           expect(resource).to respond_to(:valid_type?)
+        end
+
+        context 'IF attribute is required' do
+          before do
+            resourceClass.attribute :type, values: valid_types, required: true
+          end
+
+          context 'AND attributes[attr] is missing' do
+            specify 'valid_#{attr}? returns false' do
+              resource.attributes[:type] = nil
+              expect(resource.valid_type?).to be false
+            end
+
+            specify 'sets errors[attr]' do
+              resource.attributes[:type] = nil
+              resource.valid_type?
+              expect(resource.errors[:type]).to eq("missing value for required attribute :type")
+            end
+          end
+        end
+
+        context 'IF attribute is NOT required' do
+          before do
+            resourceClass.attribute :type, values: valid_types, required: false
+          end
+
+          context 'AND attributes[attr] is missing' do
+            specify 'valid_#{attr}? returns true' do
+              resource.attributes[:type] = nil
+              expect(resource.valid_type?).to be true
+            end
+          end
         end
 
         context 'IF attribute value is in the enum' do
@@ -136,12 +169,45 @@ module BCommerce
           expect(resource).to respond_to(:valid_custom_url?)
         end
 
+        context 'IF attribute is required' do
+          before do
+            resourceClass.attribute :custom_url, type: Object, required: true, validate_with: :some_method
+          end
+
+          context 'AND attributes[attr] is missing' do
+            specify 'valid_#{attr}? returns false' do
+              resource.attributes[:custom_url] = nil
+              expect(resource.valid_custom_url?).to be false
+            end
+
+            specify 'sets errors[attr]' do
+              resource.attributes[:custom_url] = nil
+              resource.valid_custom_url?
+              expect(resource.errors[:custom_url]).to eq("missing value for required attribute :custom_url")
+            end
+          end
+        end
+
+        context 'IF attribute is NOT required' do
+          before do
+            resourceClass.attribute :custom_url, type: Object, required: false, validate_with: :some_method
+          end
+
+          context 'AND attributes[attr] is missing' do
+            specify 'valid_#{attr}? returns true' do
+              resource.attributes[:custom_url] = nil
+              expect(resource.valid_custom_url?).to be true
+            end
+          end
+        end
+
         context 'IF attribute[attr] value is invalid' do
           before do
             expect(resource).to receive(:some_method).and_return(false)
           end
 
           specify 'valid_#{attr}? returns false' do
+            resource.attributes[:custom_url] = 'invalid value'
             expect(resource.valid_custom_url?).to be false
           end
 
@@ -163,6 +229,8 @@ module BCommerce
 
         context 'IF :validate_with passed' do
           specify 'valid_#{attr}? calls method passed in :validate_with' do
+            resourceClass.attribute :custom_url, type: Object, validate_with: :some_method
+            resource.attributes[:custom_url] = 'invalid value'
             expect(resource).to receive(:some_method)
             resource.valid_custom_url?
           end
@@ -177,6 +245,40 @@ module BCommerce
 
         it 'generates valid_#{attr}? method' do
           expect(resource).to respond_to(:valid_categories?)
+        end
+
+        context 'IF attribute is required' do
+          before do
+            resourceClass.attribute :categories, type: Array, required: true, values_type: Integer
+          end
+
+          context 'AND attributes[attr] is missing' do
+            specify 'valid_#{attr}? returns false' do
+              resource.attributes[:categories] = []
+              expect(resource.valid_categories?).to be false
+            end
+
+            specify 'sets errors[attr]' do
+              [[], nil].each do |empty_value|
+                resource.attributes[:categories] = empty_value
+                resource.valid_categories?
+                expect(resource.errors[:categories]).to eq("missing value for required attribute :categories")
+              end
+            end
+          end
+        end
+
+        context 'IF attribute is NOT required' do
+          before do
+            resourceClass.attribute :categories, type: Array, required: false, values_type: Integer
+          end
+
+          context 'AND attributes[attr] is missing' do
+            specify 'valid_#{attr}? returns true' do
+              resource.attributes[:categories] = nil
+              expect(resource.valid_categories?).to be true
+            end
+          end
         end
 
         context 'IF :values_type passed' do
