@@ -127,6 +127,49 @@ module BCommerce
         end
       end
 
+      context 'FOR Object attribute' do
+        before do
+          resourceClass.attribute :custom_url, type: Object, validate_with: :some_method
+        end
+
+        it 'generates valid_#{attr}? method' do
+          expect(resource).to respond_to(:valid_custom_url?)
+        end
+
+        context 'IF attribute[attr] value is invalid' do
+          before do
+            expect(resource).to receive(:some_method).and_return(false)
+          end
+
+          specify 'valid_#{attr}? returns false' do
+            expect(resource.valid_custom_url?).to be false
+          end
+
+          specify 'valid_#{attr}? sets errors[attr]' do
+            value = 'invalid value'
+            resource.attributes[:custom_url] = value
+            resource.valid_custom_url?
+            expect(resource.errors[:custom_url]).to\
+              eq("#{value.inspect} is invalid for :custom_url per :some_method method")
+          end
+        end
+
+        context 'IF :validate_with NOT passed' do
+          it 'raises error' do
+            expect{ resourceClass.attribute :custom_url, type: Object, validate_with: nil }.to\
+              raise_error(ArgumentError, ':validate_with is required for attributes of type Object')
+          end
+        end
+
+        context 'IF :validate_with passed' do
+          specify 'valid_#{attr}? calls method passed in :validate_with' do
+            expect(resource).to receive(:some_method)
+            resource.valid_custom_url?
+          end
+        end
+
+      end
+
       context 'FOR Array attribute' do
         before do
           resourceClass.attribute :categories, type: Array, values_type: Integer

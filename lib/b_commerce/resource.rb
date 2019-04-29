@@ -151,6 +151,26 @@ module BCommerce
         end
       end
 
+      def define_object_attribute(attr, options)
+        if !options[:validate_with]
+          raise ArgumentError.new(':validate_with is required for attributes of type Object')
+        end
+
+        define_method(:"valid_#{attr}?") do
+          attr = attr.to_sym
+          value = attributes[attr]
+          validation_meth = options[:validate_with]
+
+          errors.delete(attr)
+
+          if !send(validation_meth)
+            errors[attr] = "#{value.inspect} is invalid for #{attr.inspect} per #{validation_meth.inspect} method"
+          end
+
+          !errors.key?(attr)
+        end
+      end
+
       def define_array_attribute(attr, options)
         if !options[:values_type].is_a?(Class) && !options.key?(:validate_with)
           raise ArgumentError.new('For type Array, :values_type or :validate_with arguments should be passed.')
