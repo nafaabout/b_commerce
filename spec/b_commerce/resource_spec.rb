@@ -429,7 +429,7 @@ module BCommerce
         it 'returns false' do
           resourceClass.attribute :name, type: String, length: 1..100
           resourceClass.attribute :inventory_level, type: Integer, range: (0..100)
-          expect(resource).to receive(:valid_name?).and_return(false)
+          resource.attributes[:name] = '' # lenght 0
           allow(resource).to receive(:valid_inventory_level?).and_return(true)
           expect(resource).to_not be_valid
         end

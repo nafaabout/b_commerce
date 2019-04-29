@@ -22,9 +22,9 @@ module BCommerce
 
     def valid?
       self.class.attributes.each_key do |attr|
-        return false if !send(:"valid_#{attr}?")
+        !send(:"valid_#{attr}?")
       end
-      true
+      errors.empty?
     end
 
     def errors
@@ -41,6 +41,65 @@ module BCommerce
                 else
                   super()
                 end
+    end
+
+    private
+
+    def request_hash
+      request = {
+        method: method,
+        path: path(id: attributes[:id]),
+        headers: headers
+      }
+      request[:body]   = attributes.to_json if set_request_body?
+      request[:query]  = query if set_request_query?
+      request
+    end
+
+    def method
+      if post?
+        :post
+      elsif put?
+        :put
+      else
+        :get
+      end
+    end
+
+    def set_request_body?
+      post? || put?
+    end
+
+    def post?
+      !attributes[:id]
+    end
+
+    def put?
+      !!attributes[:id]
+    end
+
+    def set_request_query?
+      !query.empty?
+    end
+
+    def valid_float?(value)
+      Float(value)
+      true
+    rescue
+      false
+    end
+
+    def valid_integer?(value)
+      Integer(value).to_s == value.to_s
+    rescue
+      false
+    end
+
+    def valid_datetime?(value)
+      DateTime.strptime(value)
+      true
+    rescue
+      false
     end
 
     class << self
@@ -214,65 +273,6 @@ module BCommerce
         end
       end
 
-    end
-
-    private
-
-    def request_hash
-      request = {
-        method: method,
-        path: path(id: attributes[:id]),
-        headers: headers
-      }
-      request[:body]   = attributes.to_json if set_request_body?
-      request[:query]  = query if set_request_query?
-      request
-    end
-
-    def method
-      if post?
-        :post
-      elsif put?
-        :put
-      else
-        :get
-      end
-    end
-
-    def set_request_body?
-      post? || put?
-    end
-
-    def post?
-      !attributes[:id]
-    end
-
-    def put?
-      !!attributes[:id]
-    end
-
-    def set_request_query?
-      !!@set_request_query
-    end
-
-    def valid_float?(value)
-      Float(value)
-      true
-    rescue
-      false
-    end
-
-    def valid_integer?(value)
-      Integer(value).to_s == value.to_s
-    rescue
-      false
-    end
-
-    def valid_datetime?(value)
-      DateTime.strptime(value)
-      true
-    rescue
-      false
     end
 
   end

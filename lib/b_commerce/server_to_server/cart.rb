@@ -18,6 +18,16 @@ module BCommerce
       }
 
       generate_include_param_query_method(param: 'include', valid_values: QUERY_PARAMS[:include])
+
+      def validate_line_items
+        # TODO: implement this
+        true
+      end
+
+      def validate_gift_certificates
+        # TODO: implement this
+        true
+      end
     end
   end
 end

@@ -50,7 +50,7 @@ module BCommerce
           is_preorder_only: { values: [true, false, 1, 0]},
           is_price_hidden: { values: [true, false, 1, 0]},
           price_hidden_label: { type: String, length: 0..200},
-          custom_url: { validate_with: :validate_custom_url},
+          custom_url: { type: Object, validate_with: :validate_custom_url},
           open_graph_type: { values: ["product", "album", "book", "drink", "food", "game", "movie", "song", "tv_show"]},
           open_graph_title: { type: String},
           open_graph_description: { type: String},
