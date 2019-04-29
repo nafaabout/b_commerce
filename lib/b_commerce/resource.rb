@@ -107,6 +107,14 @@ module BCommerce
         @attributes ||= {}
       end
 
+      def required_attributes
+        @required_attributes ||= {}
+      end
+
+      def readonly_attributes
+        @readonly_attributes ||= {}
+      end
+
       def attribute(attr, options = {})
         attr = attr.to_sym
         if options[:type]
@@ -120,6 +128,8 @@ module BCommerce
         define_setter(attr)
         define_getter(attr)
         self.attributes[attr] = options
+        self.readonly_attributes[attr] = options if options[:readonly]
+        self.required_attributes[attr] = options if options[:required]
       end
 
       private

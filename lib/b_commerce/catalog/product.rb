@@ -3,21 +3,22 @@ module BCommerce
     class Product < Resource
       PATH = '/catalog/products'
 
-      attribute :name, type: String, length: 1..255
-      attribute :type, values: ["physical", "digital"]
+      attribute :id, type: Integer, readonly: true
+      attribute :name, type: String, length: 1..255, required: true
+      attribute :type, values: ["physical", "digital"], required: true
       attribute :sku, type: String,  length: 0..255
       attribute :description, type: String
-      attribute :weight, type: Float, range: (0..)
+      attribute :weight, type: Float, range: (0..), required: true
       attribute :width, type: Float, range: (0..)
       attribute :depth, type: Float, range: (0..)
       attribute :height, type: Float, range: (0..)
-      attribute :price, type: Float, range: (0..)
+      attribute :price, type: Float, range: (0..), required: true
       attribute :cost_price, type: Float, range: (0..)
       attribute :retail_price, type: Float, range: (0..)
       attribute :sale_price, type: Float, range: (0..)
       attribute :tax_class_id, type: Integer, range: (0..)
       attribute :product_tax_code, type: String, length: 0..255
-      attribute :categories, type: Array, values_type: Integer
+      attribute :categories, type: Array, values_type: Integer, required: true
       attribute :brand_id, type: Integer, range: (0..)
       attribute :inventory_level, type: Integer, range: (0..)
       attribute :inventory_warning_level, type: Integer, range: (0..)
@@ -59,18 +60,18 @@ module BCommerce
       attribute :open_graph_use_image, values: BOOLEAN
       attribute :gtin, type: String
       attribute :mpn, type: String
-      attribute :calculated_price, type: Float
+      attribute :calculated_price, type: Float, readonly: true
       attribute :reviews_rating_sum, type: Integer
       attribute :reviews_count, type: Integer
       attribute :total_sold, type: Integer
       attribute :custom_fields, type: Array, validate_with: :validate_custom_fields
       attribute :bulk_pricing_rules, type: Array, validate_with: :validate_bulk_pricing_rules
-      attribute :date_created, type: DateTime
-      attribute :date_modified, type: DateTime
+      attribute :date_created, type: DateTime, readonly: true
+      attribute :date_modified, type: DateTime, readonly: true
       attribute :images, type: Array, validate_with: :validate_image
       attribute :videos, type: Array, validate_with: :validate_video
       attribute :variants, type: Array, validate_with: :validate_variant
-      attribute :base_variant_id, type: Integer
+      attribute :base_variant_id, type: Integer, readonly: true
 
 
       def initialize(attributes = {})

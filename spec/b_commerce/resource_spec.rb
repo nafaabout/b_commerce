@@ -38,6 +38,20 @@ module BCommerce
         end
       end
 
+      context 'IF passed required: true' do
+        it 'adds the attribute to the required_attributes hash' do
+          expect{ resourceClass.attribute :id, type: Integer, required: true }.to\
+            change{ resourceClass.required_attributes[:id] }.to({ type: Integer, required: true })
+        end
+      end
+
+      context 'IF passed readonly: true' do
+        it 'adds the attribute to the required_attributes hash' do
+          expect{ resourceClass.attribute :id, type: Integer, readonly: true }.to\
+            change{ resourceClass.readonly_attributes[:id] }.to({ type: Integer, readonly: true })
+        end
+      end
+
       context 'FOR Enum attribute' do
         let(:valid_types){ ['physical', 'digital'] }
 
