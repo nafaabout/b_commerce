@@ -118,6 +118,38 @@ module BCommerce
           expect(resource).to respond_to(:valid_name?)
         end
 
+        context 'IF attribute is required' do
+          before do
+            resourceClass.attribute :name, type: Object, required: true, validate_with: :some_method
+          end
+
+          context 'AND attributes[attr] is missing' do
+            specify 'valid_#{attr}? returns false' do
+              resource.attributes[:name] = nil
+              expect(resource.valid_name?).to be false
+            end
+
+            specify 'sets errors[attr]' do
+              resource.attributes[:name] = nil
+              resource.valid_name?
+              expect(resource.errors[:name]).to eq("missing value for required attribute :name")
+            end
+          end
+        end
+
+        context 'IF attribute is NOT required' do
+          before do
+            resourceClass.attribute :name, type: Object, required: false, validate_with: :some_method
+          end
+
+          context 'AND attributes[attr] is missing' do
+            specify 'valid_#{attr}? returns true' do
+              resource.attributes[:name] = nil
+              expect(resource.valid_name?).to be true
+            end
+          end
+        end
+
         context 'IF attribute value is NOT a string' do
           let(:value){ [:an_array, :not_a_string] }
 

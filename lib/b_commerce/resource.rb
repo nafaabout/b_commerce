@@ -195,8 +195,6 @@ module BCommerce
             if value.nil? || Array(value).empty?
               if options[:required]
                 errors[attr] = "missing value for required attribute #{attr.inspect}"
-              else
-                return true
               end
             elsif !value.is_a?(Array)
               errors[attr] = "#{value.inspect} is invalid, #{attr.inspect} must be an Array"
@@ -236,13 +234,17 @@ module BCommerce
         define_method("valid_#{attr}?") do
           attr = attr.to_sym
           length_range = options[:length]
-          attr_value = attributes[attr]
+          value = attributes[attr]
 
           errors.delete(attr)
 
-          if !attr_value.is_a?(String)
-            errors[attr] = "#{attr_value.inspect} is not a valid value, #{attr.inspect} must be a String."
-          elsif length_range && !length_range.include?(attr_value.to_s.length)
+          if value.nil?
+            if options[:required]
+              errors[attr] = "missing value for required attribute #{attr.inspect}"
+            end
+          elsif !value.is_a?(String)
+            errors[attr] = "#{value.inspect} is not a valid value, #{attr.inspect} must be a String."
+          elsif length_range && !length_range.include?(value.to_s.length)
             errors[attr] = "#{attr.inspect} should be a" +
               " String of length between #{length_range.min.inspect} and #{length_range.max.inspect}"
           end
