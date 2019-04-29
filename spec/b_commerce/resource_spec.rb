@@ -579,6 +579,38 @@ module BCommerce
           expect(resource).to respond_to(:valid_preorder_release_date?)
         end
 
+        context 'IF attribute is required' do
+          before do
+            resourceClass.attribute :preorder_release_date, type: DateTime, required: true
+          end
+
+          context 'AND attributes[attr] is missing' do
+            specify 'valid_#{attr}? returns false' do
+              resource.attributes[:preorder_release_date] = nil
+              expect(resource.valid_preorder_release_date?).to be false
+            end
+
+            specify 'sets errors[attr]' do
+              resource.attributes[:preorder_release_date] = nil
+              resource.valid_preorder_release_date?
+              expect(resource.errors[:preorder_release_date]).to eq("missing value for required attribute :preorder_release_date")
+            end
+          end
+        end
+
+        context 'IF attribute is NOT required' do
+          before do
+            resourceClass.attribute :preorder_release_date, type: Array, required: false, values_type: Integer
+          end
+
+          context 'AND attributes[attr] is missing' do
+            specify 'valid_#{attr}? returns true' do
+              resource.attributes[:preorder_release_date] = nil
+              expect(resource.valid_preorder_release_date?).to be true
+            end
+          end
+        end
+
         context 'IF attribute value is a valid datetime string of the format ("%Y-%m-%dT%H:%M:%S%z")' do
           it 'returns true' do
             resource.attributes[:preorder_release_date] = '2019-04-24T19:08:48+01:00'

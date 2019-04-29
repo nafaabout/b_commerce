@@ -258,7 +258,11 @@ module BCommerce
 
           errors.delete(attr)
 
-          if !value.is_a?(DateTime) &&
+          if value.nil?
+            if options[:required]
+              errors[attr] = "missing value for required attribute #{attr.inspect}"
+            end
+          elsif !value.is_a?(DateTime) &&
               !(value.is_a?(String) && valid_datetime?(attributes[attr]))
 
             errors[attr] = "#{value.inspect} is not valid Date for #{attr.inspect}, " +
