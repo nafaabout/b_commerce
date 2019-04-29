@@ -278,7 +278,11 @@ module BCommerce
           range = options[:range]
           errors.delete(attr)
 
-          if !valid_float?(value)
+          if value.nil?
+            if options[:required]
+              errors[attr] = "missing value for required attribute #{attr.inspect}"
+            end
+          elsif !valid_float?(value)
             errors[attr] = "#{value.inspect} is not valid value for #{attr.inspect}, it should be a Float"
           elsif range && !range.include?(value.to_f)
             errors[attr] = "#{value.inspect} is out of range, #{attr.inspect} should be a Float between #{range.min} and #{range.max}"

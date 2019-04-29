@@ -426,6 +426,7 @@ module BCommerce
             end
           end
         end
+
         context 'IF attribute value is an Integer' do
           it 'returns true' do
             resource.attributes[:inventory_level] = '44'
@@ -485,6 +486,38 @@ module BCommerce
 
         it 'generates valid_#{attr}? method' do
           expect(resource).to respond_to(:valid_weight?)
+        end
+
+        context 'IF attribute is required' do
+          before do
+            resourceClass.attribute :weight, type: Float, range: (0..100), required: true
+          end
+
+          context 'AND attributes[attr] is missing' do
+            specify 'valid_#{attr}? returns false' do
+              resource.attributes[:weight] = nil
+              expect(resource.valid_weight?).to be false
+            end
+
+            specify 'sets errors[attr]' do
+              resource.attributes[:weight] = nil
+              resource.valid_weight?
+              expect(resource.errors[:weight]).to eq("missing value for required attribute :weight")
+            end
+          end
+        end
+
+        context 'IF attribute is NOT required' do
+          before do
+            resourceClass.attribute :weight, type: Array, required: false, values_type: Integer
+          end
+
+          context 'AND attributes[attr] is missing' do
+            specify 'valid_#{attr}? returns true' do
+              resource.attributes[:weight] = nil
+              expect(resource.valid_weight?).to be true
+            end
+          end
         end
 
         context 'IF attribute value is a Float' do
