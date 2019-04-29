@@ -50,7 +50,7 @@ module BCommerce
       attribute :is_preorder_only, values: BOOLEAN
       attribute :is_price_hidden, values: BOOLEAN
       attribute :price_hidden_label, type: String, length: 0..200
-      attribute :custom_url, validate_with: :validate_custom_url
+      attribute :custom_url, type: Object, validate_with: :validate_custom_url
       attribute :open_graph_type, values: ["product", "album", "book", "drink", "food", "game", "movie", "song", "tv_show"]
       attribute :open_graph_title, type: String
       attribute :open_graph_description, type: String
@@ -77,6 +77,37 @@ module BCommerce
         super(attributes)
       end
 
+      private
+
+      def validate_custom_url
+        # TODO: implement this
+        true
+      end
+
+      def validate_custom_fields
+        # TODO: implement this
+        true
+      end
+
+      def validate_bulk_pricing_rules
+        # TODO: implement this
+        true
+      end
+
+      def validate_image
+        # TODO: implement this
+        true
+      end
+
+      def validate_video
+        # TODO: implement this
+        true
+      end
+
+      def validate_variant
+        # TODO: implement this
+        true
+      end
     end
   end
 end

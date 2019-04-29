@@ -55,6 +55,8 @@ module BCommerce
           send(:"define_#{type}_attribute", attr, options)
         elsif(options[:values])
           define_enum_attribute(attr, options)
+        else
+          raise ArgumentError.new("expected :type or :values argument for .attribute method, no one provided for #{attr.inspect}")
         end
         define_setter(attr)
         define_getter(attr)
@@ -179,7 +181,6 @@ module BCommerce
         define_method("valid_#{attr}?") do
           attr = attr.to_sym
           value = attributes[attr]
-          return false unless value.is_a?(String) || value.is_a?(Numeric)
 
           range = options[:range]
           errors.delete(attr)
@@ -198,7 +199,6 @@ module BCommerce
         define_method("valid_#{attr}?") do
           attr = attr.to_sym
           value = attributes[attr]
-          return false unless value.is_a?(String) || value.is_a?(Numeric)
 
           errors.delete(attr)
           range = options[:range]

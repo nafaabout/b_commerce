@@ -31,6 +31,13 @@ module BCommerce
           change{ resource.respond_to?(:name) }.from(false).to(true)
       end
 
+      context 'IF NOT passed neither :type nor :values arguments' do
+        it 'raise error' do
+          expect{ resourceClass.attribute :name, length: 1..100 }.to\
+            raise_error(ArgumentError, "expected :type or :values argument for .attribute method, no one provided for :name")
+        end
+      end
+
       context 'FOR Enum attribute' do
         let(:valid_types){ ['physical', 'digital'] }
         before do
