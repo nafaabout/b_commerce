@@ -838,6 +838,40 @@ module BCommerce
       end
     end
 
+    describe '#exists?' do
+      let(:id){ rand(100) }
+      let(:attributes) { { id: id, name: 'Some good prod', price: 12.4 } }
+      let(:status) { 200 }
+      let(:response){ Excon::Response.new(body: { data: attributes }.to_json, status: status) }
+
+      before do
+        resource.id = id
+        expect(resource.connection).to receive(:get)
+          .with(path: resource.path, headers: resource.headers, query: { include_fields: 'id' })
+          .and_return(response)
+      end
+
+      it 'calls the API with query: { include_fields: "id" }' do
+        resource.exists?
+      end
+
+      context 'IF response status is 200' do
+        let(:status){ 200 }
+
+        it 'returns true' do
+          expect(resource.exists?).to be true
+        end
+      end
+
+      context 'IF response status is NOT 200' do
+        let(:status){ 404 }
+
+        it 'returns false' do
+          expect(resource.exists?).to be false
+        end
+      end
+    end
+
     describe '#new?' do
       context 'IF attributes[:id] is set' do
         it 'returns false' do

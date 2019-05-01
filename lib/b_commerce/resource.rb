@@ -43,7 +43,8 @@ module BCommerce
     end
 
     def exists?
-
+      resp = connection.get(path: path, headers: headers, query: { include_fields: 'id' })
+      resp.status == 200
     end
 
     def new?
