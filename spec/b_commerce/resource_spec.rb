@@ -9,6 +9,7 @@ module BCommerce
       BCommerce::Base.setup(client_id: 'id', store_hash: store_hash, auth_token: 'token')
       resourceClass::API_VERSION = 'v3'
       resourceClass::PATH = '/resources'
+      resourceClass.attribute(:id, type: Integer)
     end
 
     it 'inherits from BCommerce::Base' do
@@ -18,7 +19,7 @@ module BCommerce
     describe '.attribute' do
       it 'adds the attribute with its options to .attributes hash' do
         expect{ resourceClass.attribute :name, type: String, length: 1..100 }.to\
-          change{ resourceClass.attributes }.from({}).to({name: { type: String, length: 1..100 }})
+          change{ resourceClass.attributes }.to({id: { type: Integer }, name: { type: String, length: 1..100 }})
       end
 
       it 'defines setter method for the attribute' do
@@ -687,16 +688,18 @@ module BCommerce
     describe '#path' do
       let(:resource_path){ "/stores/#{store_hash}/#{resourceClass::API_VERSION}/resources" }
 
-      context 'IF passed :id' do
+      context 'IF attributes[:id] is set' do
         it 'returns STORE_PATH/PATH/id' do
           id = rand(100)
-          expect(resource.path(id: id)).to eq("#{resource_path}/#{id}")
+          resource.id = id
+          expect(resource.path).to eq("#{resource_path}/#{id}")
         end
       end
 
-      context 'IF NOT passed :id' do
+      context 'IF attributes[:id] is NOT set' do
         it 'returns STORE_PATH/PATH' do
-          expect(resource.path(id: nil)).to eq(resource_path)
+          resource.id = nil
+          expect(resource.path).to eq(resource_path)
         end
       end
     end
@@ -798,8 +801,60 @@ module BCommerce
       end
     end
 
-    describe '#update'
     describe '#delete'
+    describe '#exists?'
+
+    describe '#reload' do
+      context 'IF attribute[:id] is set' do
+        let(:id){ rand(100) }
+        let(:attributes) { { id: id, name: 'Some good prod', price: 12.4 } }
+        let(:status) { 200 }
+        let(:response){ Excon::Response.new(body: { data: attributes }.to_json, status: status) }
+
+        before do
+          resource.id = id
+          resourceClass.attribute(:name, type: String)
+          resourceClass.attribute(:price, type: Float)
+          expect(resource.connection).to receive(:get)
+            .with(path: resource.path, headers: resource.headers, query: resource.query)
+            .and_return(response)
+        end
+
+        it 'gets attributes of the resource from remote store' do
+          resource.reload
+        end
+
+        it 'sets the attributes to the attributes of the response' do
+          expect{ resource.reload }.to change{ resource.attributes }.to(attributes)
+        end
+
+        context 'IF response status is not 200' do
+          let(:status){ 404 }
+
+          it 'does not set attributes' do
+          expect{ resource.reload }.to_not change{ resource.attributes }
+          end
+        end
+      end
+    end
+
+    describe '#new?' do
+      context 'IF attributes[:id] is set' do
+        it 'returns false' do
+          resource = resourceClass.new(id: rand(100))
+          expect(resource.new?).to be false
+        end
+      end
+
+      context 'IF attributes[:id] is NOT set' do
+        it 'returns true' do
+          resource = resourceClass.new(id: nil)
+          expect(resource.new?).to be true
+        end
+      end
+    end
+
+    describe '#persisted?'
   end
 
 end

@@ -15,16 +15,43 @@ module BCommerce
       @attributes = attrs
     end
 
-    def save(validate: true)
-      return false if validate && !valid?
-      connection.request(request_hash)
-    end
-
     def valid?
       self.class.attributes.each_key do |attr|
         !send(:"valid_#{attr}?")
       end
       errors.empty?
+    end
+
+    def save(validate: true)
+      return false if validate && !valid?
+      connection.request(request_hash)
+    end
+
+    def delete
+
+    end
+
+    def reload
+      resp = connection.get(path: path, headers: headers, query: query)
+      if resp.status == 200
+        attrs = JSON(resp.body, symbolize_names: true)[:data]
+        self.class.attributes.each_key do |attr|
+          attributes[attr] = attrs[attr]
+        end
+      end
+      self
+    end
+
+    def exists?
+
+    end
+
+    def new?
+      id.nil?
+    end
+
+    def persisted?
+
     end
 
     def errors
@@ -35,11 +62,11 @@ module BCommerce
       @query ||= {}
     end
 
-    def path(id: nil)
-      @path ||= if id
-                  "#{super()}/#{id}"
+    def path
+      @path ||= if new?
+                  super
                 else
-                  super()
+                  "#{super}/#{id}"
                 end
     end
 
@@ -48,7 +75,7 @@ module BCommerce
     def request_hash
       request = {
         method: method,
-        path: path(id: attributes[:id]),
+        path: path,
         headers: headers
       }
       request[:body]   = attributes.to_json if set_request_body?
