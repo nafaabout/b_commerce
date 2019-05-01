@@ -52,7 +52,7 @@ module BCommerce
     end
 
     def persisted?
-
+      !new?
     end
 
     def errors

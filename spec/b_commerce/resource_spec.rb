@@ -832,7 +832,7 @@ module BCommerce
           let(:status){ 404 }
 
           it 'does not set attributes' do
-          expect{ resource.reload }.to_not change{ resource.attributes }
+            expect{ resource.reload }.to_not change{ resource.attributes }
           end
         end
       end
@@ -888,7 +888,22 @@ module BCommerce
       end
     end
 
-    describe '#persisted?'
+    describe '#persisted?' do
+      context 'IF attributes[:id] is set' do
+        it 'returns true' do
+          resource.id = rand(100)
+          expect(resource.persisted?).to be true
+        end
+      end
+
+      context 'IF attributes[:id] is NOT set' do
+        it 'returns false' do
+          resource.id = nil
+          expect(resource.persisted?).to be false
+        end
+      end
+    end
+
   end
 
 end
